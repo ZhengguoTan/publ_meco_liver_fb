@@ -1,0 +1,1257 @@
+\documentclass[journal,twoside,web]{ieeecolor}
+\usepackage{tmi}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{hyperref,cleveref}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{mathtools}
+\usepackage{threeparttable}
+
+\makeatletter
+\renewcommand*\env@matrix[1][\arraystretch]{%
+	\edef\arraystretch{#1}%
+	\hskip -\arraycolsep
+	\let\@ifnextchar\new@ifnextchar
+	\array{*\c@MaxMatrixCols c}}
+\makeatother
+
+
+\crefname{appsec}{Appendix}{Appendices}
+\Crefname{figure}{Fig.}{Figs.}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\markboth{\journalname, VOL. XX, NO. XX, XXXX 2022}
+{Tan \MakeLowercase{\textit{et al.}}: Free-Breathing Liver Fat \& $R_2^*$ Quantification via Multi-Echo Radial MRI and Model-based Reconstruction}
+
+\DeclareSIUnit\pixel{pixel}
+\newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
+
+% for equations that is longer than 1 line
+\newcommand{\splitatcommas}[1]{%
+	\begingroup
+	\begingroup\lccode`~=`, \lowercase{\endgroup
+		\edef~{\mathchar\the\mathcode`, \penalty0 \noexpand\hspace{0pt plus 1em}}%
+	}\mathcode`,="8000 #1%
+	\endgroup
+}
+
+% for review
+\usepackage{color,soul}
+\usepackage{marginnote}
+
+\usepackage{xcolor}
+\newcommand{\mathcolorbox}[2]{\colorbox{#1}{$\displaystyle #2$}}
+
+\begin{document}
+\title{Free-Breathing Liver Fat, $R_2^*$ and $B_0$ Field Mapping Using Multi-Echo Radial FLASH and Regularized Model-based Reconstruction}
+\author{Zhengguo Tan, Christina Unterberg-Buchwald, Moritz Blumenthal, Nick Scholand, Philip Schaten, Christian Holme, Xiaoqing Wang, Dirk Raddatz, Martin Uecker
+
+\thanks{Manuscript received xxx xx, xxxx; accepted xxx xx, xxxx. Date of publication xxx xx, xxxx.
+	This work was supported by DFG (German Research Foundation) 
+	- TA 1473/2-1, UE 189/4-1, and EXC 2067/1-390729940, 
+	DZHK (German Centre for Cardiovascular Research) and NIH U24EB029240.}
+\thanks{Z.~T.~was with Institute for Diagnostic and Interventional Radiology, 
+	University Medical Center G\"ottingen (UMG). 
+	He is now with Department of Artificial Intelligence in 
+	Biomedical Engineering, University of Erlangen–Nuremberg 
+	(e-mail:~zhengguo.tan@fau.de).}
+\thanks{C.~U.~is with Department of Cardiology and Pulmonology, UMG 
+	(e-mail:~unterberg@med.uni-goettingen.de).}
+\thanks{M.~B., N.~S., and P.~S.~are with 
+	Institute for Diagnostic and Interventional Radiology, UMG 
+	(e-mail:~moritz.blumenthal@med.uni-goettingen.de; 
+	nick.scholand@med.uni-goettingen.de; 
+	philip.schaten@med.uni-goettingen.de).}
+\thanks{C.~H. and X.~W.~were with 
+	Institute for Diagnostic and Interventional Radiology, UMG. 
+	They are now with Institute of Biomedical Imaging, 
+	Graz University of Technology 
+	(e-mail:~christian.holme@med.uni-goettingen.de; 
+	xiaoqing.wang@med.uni-goettingen.de).}
+\thanks{D.~R.~is with Clinic of Gastroenterology, 
+	Gastrointestinal Oncology and Endocrinology, UMG 
+	(e-mail:~draddatz@med.uni-goettingen.de).}
+\thanks{M.~U.~is with Institute of Biomedical Imaging, 
+	Graz University of Technology and 
+	Institute for Diagnostic and Interventional Radiology, UMG 
+	(e-mail:~uecker@tugraz.at).}}
+
+\maketitle
+
+\begin{abstract}
+
+This work introduced a stack-of-radial multi-echo asymmetric-echo MRI sequence 
+for free-breathing liver volumetric acquisition. 
+Regularized model-based reconstruction was then implemented 
+in Berkeley Advanced Reconstruction Toolbox (BART) 
+to jointly estimate physical parameter maps 
+(water, fat, $R_2^*$, and $B_0$ field inhomogeneity maps) 
+and coil sensitivity maps from self-gated \textit{k}-space data. 
+Specifically, locally low rank and temporal total variation constraints 
+were employed directly on physical parameter maps. 
+The proposed free-breathing radial technique 
+was tested on a water/fat \& iron phantom, a young volunteer, 
+and obesity/diabetes/hepatic steatosis patients. 
+Quantitative fat fraction and $R_2^*$ accuracy were confirmed 
+by comparing our technique with the \hl{reference} breath-hold Cartesian scan. \marginnote[R1.5]
+The multi-echo radial sampling sequence achieves 
+fast \textit{k}-space coverage and is robust to motion. 
+Moreover, the proposed motion-resolved model-based reconstruction 
+allows for free-breathing liver fat and $R_2^*$ quantification 
+of multiple motion states. 
+Overall, our proposed technique offers a convenient tool 
+for non-invasive liver assessment with no breath holding requirement.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+calibration-less compressed sensing parallel imaging, model-based reconstruction, multi-echo radial sampling, $R_2^*$ mapping, water/fat separation.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+
+\IEEEPARstart{Q}{uantitative} parameter mapping of the liver is of interest 
+in basic research and clinical practice. Specifically, quantitative 
+proton density fat fraction (PDFF) and $R_2^*$ maps have been shown 
+to be non-invasive imaging biomarkers for hepatic 
+steatosis \cite{caussy_2018_fat,hu_2020_obesity} and 
+iron overload \cite{wood_2011_iron,hernando_2014_iron}, respectively. 
+Originating from the two-echo chemical-shift-encoded Dixon method 
+\cite{dixon_1984_wf} for qualitative water/fat separation, 
+quantitative assessment of liver fat and iron decomposition firstly requires 
+multi-echo chemical-shift encoding (e.g.~low flip angle multi-gradient-echo acquisition). 
+Conventional acquisition methods require subjects to perform proper breath hold. 
+Therefore, incomplete breath hold or incorporate patients can induce 
+pronounced image artifacts, 
+thereby hampering the quantification of liver fat and $R_2^*$.
+
+To address the respiratory motion problem, \marginnote{R1.4}
+several recent work proposed free-breathing liver fat and $R_2^*$ mapping. 
+Armstrong et al.~\cite{armstrong_2018_fat} and 
+Zhong et al.~\cite{zhong_2020_r2sclinic,zhong_2020_resr2s} 
+proposed to use stack-of-radial multi-echo sampling with bipolar gradients. 
+Sampled echoes were then binned into four respiratory phases 
+and reconstructed via NUFFT \cite{fessler_2003_nufft}. 
+Liver fat and $R_2^*$ maps are quantified 
+via physics modeling \cite{yu_2007_t2sideal,yu_2008_mft2sideal,chebrolu_2010_indiwf} 
+and image-space fitting \cite{reeder_2005_ideal,hernando_2010_gc,zhong_2014_wfadafit}. 
+\hl{Schneider et al.~\mbox{\cite{schneider_2020_mobawfr2s}} 
+employed model-based reconstruction 
+\mbox{\cite{block_2009_mobat2,fessler_2010_moba,doneva_2010_mobawf}} 
+to jointly reconstruct water, fat, and $R_2^*$ maps directly from $k$-space data 
+with spatial total variation (TV) regularization, 
+whereas the $B_0$ field inhomogeneity map was pre-calibrated \mbox{\cite{hernando_2010_gc}} 
+and kept constant. } \marginnote{R1.3}
+Wang et al.~\cite{wang_2022_mt-me} implemented 
+inversion recovery (IR) magnetization preparation before multi-echo readouts 
+and applied the multi-tasking reconstruction technique \cite{christodoulou_2018_mt} 
+to reconstruct respiratory motion resolved multi-echo and IR images. 
+Subsequently, these images were used for model fitting \cite{hernando_2010_gc} 
+to obtain quantitative fat, $R_2^*$, and water-specific $T_1$ maps. 
+Starekova et al.~\cite{starekova_2022_fb-fat} proposed a 2D acquisition scheme 
+with a non-local means \cite{buades_2005_nlm} motion-corrected averaging technique. 
+
+Among these free-breathing techniques, only the work from Schneider et al.~employed 
+model-based reconstruction. However, this work does not allow for $B_0$ update during 
+motion-resolved model-based reconstruction. Joint $B_0$ estimation is challenging. 
+\hl{On the one hand, $B_0$ fluctuations induced by respiratory motion 
+	result in temporarily varying $B_0$ maps. 
+	On the other hand, the $B_0$ field map term appears as a non-linear term 
+	in the water/fat separation problem.} \marginnote{R1.7}
+One popular proposal is \hl{to enforce spatial smoothness of the $B_0$ field map 
+	via first- or second-order finite-difference regularization 
+	\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}}}. \marginnote{R1.8}
+Although promising, it may still be challenging when phase wraps occur along echoes. 
+
+
+\marginnote[R2.13]
+
+The contribution of this work is two-fold.
+First, to achieve more efficient and faster acquisition, 
+our work combined multi-echo asymmetric-echo radial fast low-angle shot (FLASH) 
+with stack-of-stars volumetric acquisition \cite{block_2014_rad}
+for free-breathing acquisition. 
+Second, we implemented a regularized model-based reconstruction method 
+for joint estimation of all quantitative parameter maps 
+and coil sensitivity maps directly from $k$-space data. 
+We solved the nonlinear inverse problem via 
+iteratively regularized Gauss-Newton method (IRGNM) \cite{uecker_2008_nlinv} 
+with the alternating direction method of multipliers (ADMM), 
+allowing for generalized regularization terms \cite{boyd_2010_admm}. 
+We validated the proposed acquisition and reconstruction methods by 
+comparing with the \hl{reference breath-hold Cartesian scan \mbox{\cite{zhong_2014_wfadafit}}} 
+through patients diagnosed with obesity, diabetes, or NAFLD. 
+This work enables high-resolution free-breathing volumetric liver 
+quantitative mapping with reduced scan time.
+
+
+
+%\hl{To further improve the stack-of-radial multi-echo sampling efficiency, 
+%we incorporated asymmetric echo with multi-echo readouts, 
+%which reduces the acquisition time and renders echo asymmetry \mbox{\cite{reeder_2005_ideal}}.} \marginnote{R1.1}
+%Further, different from the above reconstruction approaches \cite{armstrong_2018_fat,zhong_2020_r2sclinic,zhong_2020_resr2s,schneider_2020_mobawfr2s,wang_2022_mt-me,starekova_2022_fb-fat}, 
+%we implemented a generalized nonlinear model-based reconstruction framework in BART, 
+%allowing for joint estimation of all model parameters, including $B_0$ field inhomogeneity maps.
+
+
+
+
+
+
+%Although numerically more challenging, 
+%model-based reconstruction allows for the application of direct regularization onto 
+%parameter maps, thereby opening up possibilities of enforcing physical properties 
+%in regularized inverse reconstructions. For instance, 
+%Zhang et al.~\cite{zhang_2015_llr} and Zhao et al.~\cite{zhao_2015_sparsity} 
+%proposed to apply local low rank and sparsity constraints 
+%on multi-contrast images for subsequent $T_1$ and $T_2$ parameter model fitting. 
+%Knoll et al.~\cite{knoll_2015_mobadiff} imposed a total variation (TV) constraint 
+%on the diffusion tensor. 
+%Tan et al.~\cite{tan_2017_mobaflow} applied Tikhonov regularization 
+%onto phase-contrast velocity maps. 
+%Roeloffs et al.~\cite{roeloffs_2016_mobat1} and 
+%Wang et al.~\cite{wang_2018_mobat1,wang_2019_myt1} explored 
+%the Tikhonov and spatial sparsity constraints of parameter maps 
+%for $T_1$ mapping, respectively. 
+%Zimmermann et al.~\cite{zimmermann_2018_mobamgre} minimized 
+%the rank of local Hankel matrices constructed along the echo dimension 
+%for the application of brain $R_2^*$ mapping.
+
+%In the regime of model-based reconstruction for multi-gradient-echo signal, 
+%one major challenge is the accurate estimation of $B_0$ field inhomogeneity maps. 
+%\hl{On the one hand, $B_0$ fluctuations induced by respiratory motion 
+%result in temporarily varying $B_0$ maps. 
+%On the other hand, the $B_0$ field map term appears as a non-linear term 
+%in the water/fat separation problem.} \marginnote{R1.7}
+%One popular proposal is \hl{to enforce spatial smoothness of the $B_0$ field map 
+%via first- or second-order finite-difference regularization 
+%\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}}}. \marginnote{R1.8}
+%Although promising, it may still be challenging when phase wraps occur along echoes. 
+%Another recent proposal is to incorporate a calibrated $B_0$ field map \cite{hernando_2010_gc} 
+%into the model-based reconstruction \cite{schneider_2020_mobawfr2s}, 
+%\hl{i.e.~keeping the $B_0$ field map as constant during the model-based reconstruction.} \marginnote{R1.3}
+
+
+
+
+\section{Theory}
+
+\subsection{Multi-Echo Radial Sampling}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan1.pdf}
+	\caption{(Left) One representative repetition time (TR) block of 
+		the proposed multi-echo asymmetric-echo radial sequence. 
+		(Right) The corresponding \textit{k}-space trajectory. 
+		The echoes are color coded, indicating the period when ADC is switched on, 
+		while the dark solid lines indicate either the ramp or the blip gradients. 
+		The colored arrows near to echo numbers illustrate the readout direction.}
+	\label{FIG:SEQ}
+\end{figure}
+
+Data acquisition is based on the multi-echo radial sampling sequence 
+\cite{tan_2019_mobawf}. 
+As depicted in \cref{FIG:SEQ}, seven gradient echoes per RF excitation 
+were acquired. 
+All radial spokes within one frame were uniformly distributed in \textit{k}-space 
+and the angle increment between frames was the small Golden angle 
+\cite{winkelmann_2007_golden} ($\approx 68.75^o$).
+The angles of the radial spokes within one frame are 
+$\theta_{l,m} = 2\pi \cdot [ (l-1) \cdot N_\text{echo} + m - 1 ] / (N_\text{echo} \cdot N_\text{shot})$ 
+with $l$ and $m$ being the excitation and echo index, respectively. 
+To foster echo asymmetry and to shorten scan time, 
+asymmetric echoes (i.e.~partial Fourier readouts) were employed in combination with 
+multi-echo sampling.
+
+
+\subsection{Nonlinear Signal Model}
+
+Parallel MRI \cite{roemer_1990_pi,pruessmann_1999_sense,griswold_2002_grappa} 
+simultaneously receives signals from multiple receiver coils, 
+and is extendable to include multiple echoes when using long echo-train MRI sequences,
+\begin{equation} \label{EQU:y_pimeco}
+y_{j,m}(t) = \int \text{d} \vec{r} \, e^{-i 2\pi \vec{k} (t) \cdot \vec{r} } c_j(\vec{r}) \rho_m(\vec{r}) \;,
+\end{equation}
+with $c_j$ and $\rho_m$ being the $j$th coil sensitivity map and the $m$th echo image, respectively. 
+$y_{j,m}(t)$ is the acquired multi-coil multi-echo \textit{k}-space data.
+In the case of gradient echoes, $\rho_m$ is governed by
+\begin{equation} \label{EQU:meco_mspec}
+\rho_m = \bigg( \sum_i I_i \cdot e^{i2\pi f_i \text{TE}_m} \cdot e^{-{R_2^*}_i \text{TE}_m} \bigg) \cdot e^{i2\pi f_{B_0} \text{TE}_m} \; ,
+\end{equation}
+where the first term sums up signals from all chemical species (indexed by $i$), 
+characterized by their corresponding proton density ($I_i$), 
+resonance frequency ($f_i$) and relaxation rate (${R_2^*}_i$). 
+Here, the dependency on the spatial coordinates $\vec{r}$ is suppressed for simplicity.
+In addition, the echo signal is modulated by the $B_0$ field inhomogeneity. 
+$\text{TE}_m$ denotes the $m$th echo time.
+
+This generalized multi-species signal can be simplified to only two compartments \cite{yu_2007_t2sideal,yu_2008_mft2sideal,chebrolu_2010_indiwf}, 
+i.e.~water (W) and fat (F), 
+\begin{equation} \label{EQU:meco_wfr2s}
+\rho_m = \bigg( \text{W} + \text{F} \cdot z_m \bigg) \cdot e^{- R_2^* \text{TE}_m} \cdot e^{i2\pi f_{B_0} \text{TE}_m} \; .
+\end{equation}
+The chemical-shift phase modulation from fat is denoted as 
+$z_m$ with the 6-peak fat spectrum \cite{yu_2008_mft2sideal}, 
+while all fat peaks are assumed to have an equal $R_2^*$ \cite{reeder_2012_perfr2s}.
+$\text{W}$ and $\text{F}$ are complex-valued, 
+while $R_2^*$ and $f_{B_0}$ are constrained to be real. 
+
+Given the above MR signal models, the nonlinear forward model in multi-coil multi-echo acquisition 
+can be written in the operator form 
+\begin{equation} \label{EQU:op_fwd}
+y_{j,m} = F_{j,m} (x) := P_m \mathcal{F} M \mathcal{S} \mathcal{B} \; ,
+\end{equation}
+with $x = (\text{W}, \text{F}, R_2^*, f_{B_0}, \cdots, c_j, \cdots)^T$. 
+$F_{j,m} (x)$ denotes the forward operator.
+$j$ is the the coil index ($j \in [1,N_\text{coil}]$), 
+and $m$ the echo index ($m \in [1, N_\text{echo}]$). 
+The nonlinear operator ($\mathcal{B}$) calculates echo images 
+according to the parameter maps in $x$ and 
+the corresponding signal model as given in \cref{EQU:meco_wfr2s}. 
+Every echo image is then point-wisely multiplied by every coil sensitivity map in $x$, 
+as denoted by the operator $\mathcal{S}$. 
+Afterwards, all multi-echo coil images are masked to be restricted to a given
+field of view (FOV) ($M$), Fourier-transformed ($\mathcal{F}$), and sampled ($P$) at each echo.
+In addition, because radial sampling acquires \textit{k}-space data within a circular region, 
+the \textit{k}-space filter \cite{pruessmann_2001_gsense}
+is applied onto the sampling pattern to suppress potential checker-board artifacts.
+
+\subsection{Model-based Nonlinear Inverse Reconstruction}
+
+The joint estimation of the unknown $x$ is a nonlinear inverse problem,
+\begin{equation} \label{EQU:obj_func}
+\begin{aligned}
+\text{minimize}~& \norm{y - F(x)}_2^2 \\
+& + \lambda_1 \norm{\mathcal{L} (E x)}_1 + \lambda_2 \norm{\text{TV}_t (E x)}_1 \\
+& + \lambda_3 \norm{x}_2^2 \\
+\text{subject to}~& {R_2^*} \geq 0
+\end{aligned}
+\end{equation}
+\marginnote{R1.2}The unknown $x$ in this problem contains respiratory-motion-resolved 
+model parameter maps ($\text{W}$,  $\text{F}$, $R_2^*$, and $f_{B_0}$) 
+as well as coil sensitivity maps, and thus has the shape of 
+$[N, N, 4 + N_\text{coil}, N_\text{bin}]$. 
+Here, $[N, N]$ corresponds to the image matrix size, 
+$4$ the number of model parameters, 
+and $N_\text{bin}$ the number of respiratory bins.
+The $\ell^1$-norm regularizations are only applied onto the model parameter maps, 
+which can be extracted via the operator $E$ to exclude the coil sensitivity maps.
+
+The $\mathcal{L}$ stands for the locally low rank (LLR) constraint 
+applied directly onto the model parameter maps, 
+i.e.~$\text{W}$,  $\text{F}$, $R_2^*$, and $f_{B_0}$ 
+(extracted from the unknown vector $x$ via the operator $E$), 
+while previous work \cite{zhang_2015_llr} applied LLR 
+along the echo images. 
+Regularization of echo images is not possible in model-based reconstruction, 
+which formulates nonlinear inverse problems to directly estimate model parameter maps. 
+The block size of the LLR constraint was $16 \times 16$ 
+with random shifting of the blocks among iterations.
+
+\marginnote{R1.2} \hl{For the reconstruction problems with a temporal dimension, 
+the data consistency term in \mbox{\cref{EQU:obj_func}} 
+expands to include all temporal frames, 
+\mbox{$\sum_t \sum_m \sum_j \norm{y_{j,m,t} - F_{j,m,t}(x)}_2^2$}. }
+Therefore, temporal TV regularization \cite{feng_2014_grasp} was applied onto 
+all parameter maps except coil sensitivity maps (extracted via the operator $E$). 
+In addition, $\ell2$ regularization was applied to all unknowns and 
+a non-negativity constraint to the $R_2^*$ map.
+
+To enforce spatial smoothness of the $B_0$ and coil sensitivity maps, 
+the Sobolev-norm weighting \cite{uecker_2008_nlinv} 
+was utilized to penalize high spatial frequencies, 
+\begin{equation}
+	T = \mathcal{F}^{-1} \bigg(1 + w \cdot \norm{\vec{k}} \bigg)^{-h}
+\end{equation}
+$h$ is set as $16$ for both maps, 
+while $w = 22$ and $w = 220$ for the $f_{B_0}$ and coil sensitivity maps, 
+respectively. $\vec{k}$ is 2D Cartesian grid ranging from $-0.5$ to $0.5$ 
+\cite{tan_2019_mobawf}.
+
+The objective functional in \cref{EQU:obj_func} was solved by IRGNM with ADMM. 
+For details about this algorithm please refer to \cref{SEC:APPENDIXA,SEC:APPENDIXB}. 
+This implementation enables flexible selections of regularization terms. 
+For instance, we compared our proposed method against only $\ell^2$ regularization 
+(i.e.~removal of the $\ell^1$ terms in \cref{EQU:obj_func}) 
+as well as the spatial TV regularization method 
+(i.e.~replacement of all regularization terms in \cref{EQU:obj_func} by 
+$\lambda_4 \norm{\text{TV}_\text{spatial} (E x)}_1$) \cite{schneider_2020_mobawfr2s}.
+
+\section{Methods}
+
+\subsection{Phantom Experiments}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan2.pdf}
+	\caption{Photos of the constructed water/fat \& iron phantom. 
+			(A) 34.5~mg iron nano particle diluted in 100~mL distilled water.
+			(B) Phantom layout with eight tubes as listed in (C).}
+	\label{FIG:PHA_WFIRON}
+\end{figure}
+
+\begin{table*}[t]
+	\caption{Measured volume of iron, water and peanut oil solutions for the eight tubes}
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth}}
+			\toprule
+			Solution (\si{\milli\liter}) & Tube 1 & Tube 2 & Tube 3 & Tube 4 & Tube 5 & Tube 6 & Tube 7 & Tube 8 \\
+			\hline
+			Iron  &  0.5 &  1.0 &  2.0 &  0 &  0.5 &  1.0 &  0 &  0 \\
+			Water & 50   & 50   & 50   & 45 & 45   & 45   & 40 &  0 \\
+			Fat   &  0   &  0   &  0   &  5 &  5   &  5   & 10 & 50 \\
+			\bottomrule
+		\end{tabular}
+	\label{TAB:PHA}
+\end{table*}
+
+A water/fat \& iron phantom \cite{hines_2009_wfiron,bush_2018_fat} was constructed. 
+Details of this phantom are provided in \cref{FIG:PHA_WFIRON} and \cref{TAB:PHA}. 
+\hl{Due to steams coming from the water solution, 
+which was heated at the hotplate at \mbox{\SI{300}{\celsius}} to create phantom emulsion, 
+the actual fat fraction is higher than prescribed in \mbox{\cref{TAB:PHA}}. 
+Here, the fat fraction values of every tube are validated using 
+the standard Siemens MR spectroscopy (MRS) protocol.} \marginnote{R2.2}
+MRI experiments were conducted with a 18-channel body matrix coil 
+together with a spine coil on 
+\SI{3}{\tesla} (Skyra, Siemens Healthineers, Erlangen, Germany). 
+The proposed multi-echo radial sampling sequence was used 
+with the following parameters:~FOV \SI{200}{\milli\metre}, 
+base resolution 160, spatial resolution 
+\SI{1.25}{\milli\meter}~$\times$~\SI{1.25}{\milli\meter}~$\times$~\SI{3.5}{\milli\meter},
+bandwidth \SI{1040}{\hertz/\pixel}, flip angle \SI{4}{\degree}, 
+asymmetric echo \cite{untenberger_2016_asym} of \SI{30}{\percent}, 
+TE $\splitatcommas{1.07, 2.35, 3.23, 4.51, 5.39, 6.67, 7.55}$~\si{\ms} 
+and TR $\SI{8.81}{\ms}$. 
+
+
+\subsection{In Vivo Experiments}
+
+For in vivo scans, the same coil and MRI system were used. 
+Two radial protocols were implemented, one with smaller field of view (FOV) 
+\SI{320}{\milli\meter} for subjects with relatively small body size (Volunteer \#1), 
+and another with larger FOV \SI{410}{\milli\meter} 
+which fits well for obese patients (Patient \#1 to \#9).
+In addition to our proposed multi-echo stack-of-radial free-breathing acquisition, 
+breath-hold multi-echo Cartesian Dixon MRI was used as reference. 
+Detailed parameters are provided in \cref{TAB:Protocol}. 
+Although the Cartesian scan requires one single breath hold (\SI{13}{\second}) 
+and is fast, it captures only one motion state. 
+In contrast, the proposed radial scan allows for free breathing, 
+but requires longer scan time (2:47~\si{\minute}), 
+such that subsequent reconstruction renders four respiratory motion states. 
+Further, we investigated the effectiveness of 
+the proposed motion-resolved model-based reconstruction 
+on retrospectively undersampled radial data, 
+which corresponds to half of the total scan time.
+
+
+\begin{table}
+	\begin{threeparttable}
+		\caption{Imaging parameters for (left) the breath-hold Cartesian reference 
+			and (right) the proposed free-breathing multi-echo radial acquisition}
+		\label{TAB:Protocol}
+		\setlength{\tabcolsep}{3pt}
+		\begin{tabular}{m{0.36\columnwidth} m{0.18\columnwidth} m{0.18\columnwidth} m{0.18\columnwidth}}
+			\toprule
+			& Cartesian & Radial & Radial \\
+			\hline
+			Flip angle ($^o$) & $4$ & $4$ & $4$ \\
+			Bandwidth (Hz/pixel) & 1080 & 1090 & 1090 \\
+			Asymmetric echo & None & \SI{30}{\percent} & \SI{30}{\percent} \\
+			Number of echoes & 6\tnote{a} & 7\tnote{b} & 7\tnote{c} \\
+			Repetition Time (\si{\milli\second}) & $9$ & $8.35$ & $8.39$ \\
+			FOV (mm~$\times$~mm) & $410 \times 348$ & $320 \times 320$ & $410 \times 410$ \\
+			Pixel size (mm~$\times$~mm) & $2.56 \times 2.56$ & $1.6 \times 1.6$ & $1.6 \times 1.6$ \\
+			Base resolution & $160$ & $200$ & $256$ \\
+			Slice thickness (\si{\milli\meter}) & $3.5$ & $3.5$ & $3.5$ \\
+			Slice resolution (\si{\percent}) & $50$ & $100$ & $100$ \\
+			Slice oversampling (\si{\percent}) & 25 & 25 & 25 \\
+			Number of slices & 64 & 48 & 48 \\
+			Scan time (min:sec) & 0:20 & 2:45 & 2:47 \\
+			\bottomrule
+		\end{tabular}
+		\begin{tablenotes}
+			\item[a] Echo times are $1.06, 2.46, 3.69, 4.92, 6.15, 7.38$~ms;
+			\item[b] Echo times are $0.98, 2.20, 3.04, 4.26, 5.10, 6.32, 7.16$~ms;
+			\item[c] Echo times are $0.98, 2.21, 3.05, 4.28, 5.12, 6.35, 7.19$~ms.
+		\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+One volunteer and nine obesity/diabetes/NAFLD patients participated in our study.
+All subjects gave written informed consent before MRI 
+in compliance with the regulations established by the local ethics committee. 
+A summary of all subjects is given in \cref{TAB:Subject}.
+
+\begin{table}
+	\caption{Summary of Subjects}
+	\label{TAB:Subject}
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabular}{m{0.17\columnwidth} m{0.10\columnwidth} m{0.10\columnwidth} m{0.17\columnwidth} m{0.17\columnwidth} m{0.13\columnwidth}}
+		\toprule
+		& Age & Gender & Height (\si{\centi\meter}) & Weight (\si{\kilogram}) & BMI \\
+		\hline
+		Volunteer \#1 & 27 & F & 155 &  60 & 25.0 \\
+		Patient \#1   & 55 & M & 184 & 105 & 31.0 \\ % 0040
+		Patient \#2   & 60 & F & 172 & 105 & 35.5 \\ % 0041
+		Patient \#3   & 64 & F & 164 &  80 & 29.7 \\ % 0042
+		Patient \#4   & 60 & F & 153 & 112 & 47.8 \\ % 0043
+		Patient \#5   & 44 & F & 165 &  94 & 34.5 \\ % 0044
+		Patient \#6   & 43 & F & 165 & 165 & 60.6 \\ % 0051
+		Patient \#7   & 65 & M & 176 &  98 & 31.6 \\ % 0053
+		Patient \#8   & 55 & F & 156 &  88 & 36.2 \\ % 0055
+		Patient \#9   & 54 & F & 160 &  68 & 26.6 \\ % 0056
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
+\subsection{Model-based Reconstruction}
+
+In the spirit of reproducible and open research 
+the proposed regularized model-based reconstruction is made
+publicly available in BART \cite{uecker_2021_4570601}. 
+Scripts to produce the experiments are available at \url{https://github.com/mrirecon/multi-echo-liver} upon publication. 
+A brief description of the reconstruction procedure is given here.
+
+\subsubsection*{Pre-Processing}
+
+The acquired multi-coil multi-echo data was compressed to ten virtual coils 
+via principal component analysis \cite{huang_2008_scc}. 
+The multi-echo sampling trajectory 
+was corrected for gradient delays using the
+radial spoke intersections for gradient delay estimation (RING) method 
+\cite{rosenzweig_2019_ring}. 
+RING determines the intersection points of different radial spokes. 
+Afterwards, RING estimates the gradient delay coefficients 
+given the position of the intersection points. 
+RING was applied onto every echo to estimate 
+its corresponding gradient delay coefficients, 
+which were then used to correct for trajectories.
+
+\subsubsection*{Binning}
+
+In this work, the singular spectrum analysis (SSA-FARY) technique 
+\cite{rosenzweig_2020_ssa} 
+was adapted for self gating of respiratory motions. 
+SSA-FARY combines the ideas of time-delayed embedding and principle component analysis, 
+and allows for a robust extraction of oscillatory motion signals 
+such as respiration from an auto-calibration (AC) region. 
+In particular, for a periodic signal contained in the AC region, 
+SSA-FARY yields a quadrature pair, which can be used for self-gating. 
+Such a quadrature pair can be thought of as a generalized sine-cosine-pair 
+describing the respective periodic motion and can be represented by a phase-portrait, 
+where an angle of $0^o$ states the beginning and $360^o$ states the end of a motion cycle. 
+In this work we chose to divide the respiratory motion into four bins, 
+hence, each bin represents a circular sector with central angle $360^o / N$. 
+Then, the respiratory motion state at a given time is determined by 
+the respective angle defined by the quadrature pair.
+As one echo train was relatively short, 
+only the first echo was extracted for SSA-FARY.
+
+\subsubsection*{Initialization}
+
+Off-resonance phase modulation causes phase wrapping along the echoes, 
+especially in the case large $B_0$ field inhomogeneity. 
+Consequently, multiple local minimum could occur for the field map $f_{B_0}$. 
+To prevent this, the $f_{B_0}$ map was initialized 
+from a model-based three-point water/fat separation \cite{tan_2019_mobawf}. 
+$\mathrm{W}$ and $\mathrm{F}$ were initialized as \num{0.1}. 
+${R_2^*}$ and coil sensitivity maps were initialized as \num{0}.
+
+\subsubsection*{Iterative Reconstruction}
+
+For the model-based reconstruction, the regularization strength in \cref{EQU:obj_func} 
+(e.g.~$\lambda_1$, $\lambda_2$, and $\lambda_3$) 
+is reduced along Newton iterations, e.g.~$\lambda_1^{(n)} = 1 / D^{n-1}$ for $\lambda_1$, 
+with $n$ being the $n$th Newton iteration 
+and the reduction factor $D > 1$. \marginnote{R2.17}
+$D = 3$ was used in this work. 
+For ADMM, the maximum number of iterations in each Newton iteration 
+were given as:~$n_\text{maxiter} = \min (M, 10 \times 2^{- \ln \lambda^{(n)}})$, 
+where $M$ can be specified by the user (\num{200} as default). 
+Consequently, the maximal iterations gradually increase along Newton steps.
+
+In this work, eight Newton steps were employed, 
+and the ADMM penalty parameter $\rho$ was set as $0.001$. 
+For the regularization terms in \cref{EQU:obj_func}, we set 
+$\lambda_1 = 0.01$, $\lambda_2 = 0.1$, and $\lambda_3 = 1$. 
+The scaling of the F, $R_2^*$, and $B_0$ maps was set as 
+$1.6$, $1.8$, and $0.8$, respectively.
+All reconstructions were performed on a Tesla V100-SXM2 32~GB GPU 
+(NVIDIA, Santa Clara, CA, USA).
+
+\subsubsection*{Post-Processing}
+
+With the reconstructed water and fat images, fat fraction (FF) maps can be computed 
+taking into account the magnitude discrimination \cite{liu_2007_ff}, 
+i.e.~$\text{FF} = 1 - |\text{W}| / (|\text{W}| + |\text{F}|)$ 
+for pixels in which water dominates. 
+
+
+
+\section{Results}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan3.pdf}
+	\caption{Multi-echo radial FLASH acquisition and 
+		model-based reconstruction results 
+		of the water/fat \& iron phantom built in-house. 
+		Displayed images are FF, $R_2^*$, and $B_0$ maps, respectively.}
+	\label{FIG:PHA}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\columnwidth]{../../figures/tan4.pdf}
+	\caption{Quantitative analysis of FF values 
+			for first seven tubes via linear regression 
+			between the standard MR Spectroscopy (MRS) 
+			and the proposed multi-echo radial acquisition 
+			with model-based reconstruction. 
+			Tube 8 (filled with peanut oil) is excluded for the analysis 
+			due to the lack of its MRS measurement.}
+	\label{FIG:PHA_LINFIT}
+\end{figure}
+
+With the proposed multi-echo radial FLASH acquisition and 
+model-based reconstruction, \cref{FIG:PHA} shows the results 
+of the in-house built water/fat \& iron phantom. 
+The FF values of every tube are validated against 
+the MRS measurements. 
+The FF values of all tubes match well between the two measurements, 
+as shown in \cref{FIG:PHA_LINFIT}. 
+
+
+\begin{figure*}
+	\centering
+	\includegraphics[width=\textwidth]{../../figures/tan5.pdf}
+	\caption{Comparison of (A) the reference breath-hold Cartesian scan and 
+		(B) the proposed free-breathing radial scan on Patient \#1 and \#2. 
+		Furthermore, for the radial data in (B), 
+		we compared three different regularizations: 
+		L2 regularization, 
+		spatial TV regularization as used by Schneider et al.~\cite{schneider_2020_mobawfr2s}, 
+		and the proposed LLR and temporal TV regularization. }
+	\label{FIG:REGU}
+\end{figure*}
+
+\Cref{FIG:REGU} shows the reconstructed FF and $R_2^*$ maps of Patients \#1 and \#2
+from the reference breath-hold Cartesian and the proposed free-breathing radial scan, 
+respectively. 
+The $R_2^*$ maps from Cartesian scans suffer from noise in the middle region 
+(likely due to undersampling in the phase-encoding direction). 
+Moreover, as pointed by the yellow arrows, 
+incomplete breath hold results in artifacts in the $R_2^*$ maps.
+For model-based reconstructions of the radial scan, 
+three regularizations of the parameter maps ($\mathrm{W}$, $\mathrm{F}$ and $R_2^*$) were compared: 
+$\ell^2$, spatial TV (as employed by Schneider et al.~\cite{schneider_2020_mobawfr2s}), and 
+LLR plus temporal TV as proposed in this work. 
+The application of LLR plus temporal TV regularization outperforms 
+both the $\ell^2$ and the spatial TV regularizations, 
+as evident by the reduced streaking artifacts and better delineation of the liver. 
+All subsequent figures use the same color map for FF and $R_2^*$ maps 
+as in \cref{FIG:REGU}.
+
+\begin{figure*}
+	\centering 
+	\includegraphics[width=\textwidth]{../../figures/tan6.pdf}
+	\caption{(A) One coronal-view FF and $R_2^*$ map 
+		from breath-hold Cartesian scan of Patient \#1. 
+		(B) Plots of self-gating signal and phase portraits. 
+		(C) Four coronal-view FF and $R_2^*$ maps from 
+		free-breathing radial scan with self-gated motion-resolved 
+		model-based reconstruction. 
+		The $R_2^*$ map in (A) suffers from 
+		hyper intensity in the liver dome region (yellow ellipse), 
+		whereas the proposed radial scan shows consistent $R_2^*$ values.}
+	\label{FIG:SSA}
+\end{figure*}
+
+Further, to demonstrate the effectiveness of using SSA-FARY for 
+motion resolved free-breathing radial scan, 
+\cref{FIG:SSA} compares the reference breath-hold Cartesian scan 
+and the proposed free-breathing radial scan 
+for Patient \#1 in the reformatted coronal view. 
+While the liver dome region shows hyper $R_2^*$ intensity from the Cartesian scan, 
+consistent $R_2^*$ values are visible 
+from the proposed radial scan and model-based reconstruction. 
+Such hyper intensity may be caused by the fast $B_0$ field change 
+in the liver dome region, which is close to the lung with much lower MR signal. 
+On the other hand, respiratory motion is well separated across the four frames. 
+As shown in the self-gating AC signal plot in \cref{FIG:SSA} (B), 
+A total of 330 radial spokes was acquired during free-breathing scan. 
+When plotted into the phase portrait, 
+the pair of empirical orthogonal functions (EOF) can be equally divided into 
+four angular blocks, representing four distinct respiratory motion states. 
+seen from the dotted green line and the green arrow in (C). 
+
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan7.pdf}
+	\caption{Quantitative analysis of reconstructed FF and $R_2^*$ maps 
+		for all subjects comparing the reference breath-hold Cartesian scan 
+		and the proposed free-breathing radial scan, respectively.}
+	\label{FIG:LINREG}
+\end{figure}
+
+
+% 1 - |W| / (|W| + |F|)
+\begin{table}[h!]
+	\caption{Summary of FF values for all patients from the reference Cartesian and the proposed radial acquisition.}
+	\label{TAB:SubjectSTAT_FF}
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabular}{m{0.15\columnwidth} m{0.25\columnwidth} m{0.25\columnwidth} m{0.25\columnwidth}}
+		\toprule
+		& Cartesian & Radial (2:47) & Radial (1:24) \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#1}   
+		& $25.07 \pm 2.55$ & $26.81 \pm 3.62$ & $ 25.83 \pm 4.28$ \\ % 0040
+		& $19.66 \pm 1.92$ & $19.62 \pm 3.73$ & $ 20.47 \pm 3.67$ \\
+		& $21.28 \pm 1.79$ & $23.50 \pm 2.32$ & $ 24.54 \pm 2.39$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#2}   
+		& $21.52 \pm 2.17$ & $21.53 \pm 2.34$ & $ 18.56 \pm 4.02 $ \\ % 0041
+		& $20.79 \pm 1.81$ & $20.56 \pm 3.08$ & $ 18.43 \pm 4.05 $ \\
+		& $20.56 \pm 1.24$ & $23.58 \pm 1.33$ & $ 22.98 \pm 1.69 $ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#3}   
+		& $13.66 \pm 2.31$ & $12.85 \pm 2.79$ & $15.36 \pm 3.88$ \\ % 0042
+		& $13.64 \pm 3.15$ & $14.61 \pm 3.42$ & $16.44 \pm 3.65$ \\
+		& $14.95 \pm 1.76$ & $18.74 \pm 3.52$ & $19.89 \pm 4.04$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#4}   
+		& $13.18 \pm 3.55$ & $13.12 \pm 5.28$ & $13.64 \pm 5.97$ \\ % 0043
+		& $13.41 \pm 3.11$ & $13.34 \pm 2.91$ & $13.92 \pm 3.52$ \\
+		& $14.37 \pm 3.04$ & $15.17 \pm 1.99$ & $15.45 \pm 2.27$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#5}   
+		& $16.77 \pm 1.35$ & $17.51 \pm 0.99$ & $13.31 \pm 1.66$ \\ % 0044
+		& $19.33 \pm 1.22$ & $18.74 \pm 1.29$ & $16.86 \pm 1.69$ \\
+		& $17.34 \pm 2.05$ & $17.89 \pm 1.79$ & $17.04 \pm 1.87$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#6}   
+		& $ 7.82 \pm 2.90$ & $ 5.47 \pm 2.54$ & $7.98 \pm 3.73$ \\ % 0051
+		& $ 4.82 \pm 2.03$ & $ 4.87 \pm 2.12$ & $6.87 \pm 2.58$ \\
+		& $ 7.39 \pm 1.23$ & $ 6.70 \pm 1.50$ & $8.52 \pm 2.45$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#7}   
+		& $ 9.44 \pm 1.28$ & $11.83 \pm 1.85$ & $ 9.34 \pm 3.12$ \\ % 0053
+		& $11.24 \pm 1.27$ & $13.63 \pm 1.70$ & $13.62 \pm 2.90$ \\
+		& $12.18 \pm 1.59$ & $13.96 \pm 2.26$ & $13.36 \pm 3.22$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#8}   
+		& $17.87 \pm 3.10$ & $16.71 \pm 2.02$ & $16.45 \pm 3.71$ \\ % 0055
+		& $14.16 \pm 1.35$ & $14.94 \pm 3.71$ & $14.76 \pm 4.01$ \\
+		& $14.80 \pm 1.40$ & $16.42 \pm 1.63$ & $16.79 \pm 2.89$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#9}   
+		& $26.60 \pm 0.76$ & $29.02 \pm 1.66$ & $28.71 \pm 2.19$ \\ % 0056
+		& $26.85 \pm 0.98$ & $29.24 \pm 2.21$ & $28.95 \pm 2.85$ \\
+		& $27.45 \pm 1.05$ & $30.31 \pm 1.53$ & $30.08 \pm 2.34$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[h!]
+	\caption{Summary of $R_2^*$ values for all patients from the reference Cartesian and the proposed radial acquisition.}
+	\label{TAB:SubjectSTAT_R2S}
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabular}{m{0.15\columnwidth} m{0.25\columnwidth} m{0.25\columnwidth} m{0.25\columnwidth}}
+		\toprule
+		& Cartesian & Radial (2:47) & Radial (1:24) \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#1}   
+		& $65.93 \pm 9.69$ & $64.08 \pm 11.38$ & $56.72 \pm 14.78$ \\ % 0040
+		& $59.00 \pm 7.67$ & $54.56 \pm  9.76$ & $54.21 \pm 13.88$ \\
+		& $64.37 \pm 8.05$ & $61.13 \pm  7.22$ & $70.36 \pm  8.63$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#2}   
+		& $56.76 \pm 4.63$ & $57.58 \pm 13.52$ & $44.44 \pm 22.44$ \\ % 0041
+        & $53.43 \pm 6.51$ & $46.80 \pm  4.88$ & $48.66 \pm 5.86$ \\
+        & $48.90 \pm 6.77$ & $48.46 \pm  4.23$ & $62.61 \pm 5.87$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#3}   
+		& $50.30 \pm  9.98$ & $47.42 \pm  9.91$ & $43.57 \pm 14.45$ \\ % 0042
+        & $53.66 \pm 11.92$ & $51.20 \pm  8.97$ & $52.30 \pm 11.97$ \\
+        & $52.94 \pm  9.15$ & $54.81 \pm 10.26$ & $60.57 \pm 11.76$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#4}   
+		& $57.52 \pm 13.85$ & $54.21 \pm 13.28$ & $59.46 \pm 14.17$ \\ % 0043
+        & $48.93 \pm 17.38$ & $47.89 \pm 6.67$ & $47.05 \pm 7.71$ \\
+        & $64.83 \pm  8.66$ & $65.47 \pm 5.54$ & $60.13 \pm 6.56$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#5}   
+		& $52.17 \pm 6.65$ & $49.96 \pm 4.98$ & $48.01 \pm 4.81$ \\ % 0044
+        & $51.61 \pm 6.70$ & $51.22 \pm 2.96$ & $52.09 \pm 3.83$ \\
+        & $55.00 \pm 6.23$ & $49.92 \pm 3.57$ & $52.25 \pm 5.25$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#6}   
+		& $32.71 \pm 8.34$ & $40.98 \pm 8.37$ & $39.14 \pm 11.56$ \\ % 0051
+        & $32.20 \pm 5.82$ & $28.62 \pm 3.38$ & $27.12 \pm 6.21$ \\
+        & $34.83 \pm 5.85$ & $28.93 \pm 2.94$ & $25.97 \pm 3.92$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#7}   
+		& $41.27 \pm 6.39$ & $42.79 \pm 5.27$ & $42.40 \pm 10.18$ \\ % 0053
+        & $48.56 \pm 4.66$ & $52.34 \pm 3.92$ & $46.31 \pm 7.66$ \\
+        & $45.07 \pm 4.13$ & $47.59 \pm 6.75$ & $50.20 \pm 7.36$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#8}   
+		& $48.50 \pm 10.91$ & $50.84 \pm 6.26$ & $51.40 \pm 8.10$ \\ % 0055
+        & $50.11 \pm  6.90$ & $39.33 \pm 13.85$ & $43.56 \pm 15.84$ \\
+        & $51.94 \pm  4.19$ & $53.21 \pm 5.36$ & $50.50 \pm 7.45$ \\
+		\hline
+		\multirow[t]{3}{*}{Patient \#9}   
+		& $68.23 \pm 3.42$ & $67.24 \pm 10.13$ & $72.99 \pm 14.40$ \\ % 0056
+        & $67.82 \pm 4.67$ & $70.57 \pm 8.16$ & $74.60 \pm 10.89$ \\
+        & $74.05 \pm 4.03$ & $81.62 \pm 6.64$ & $77.14 \pm 11.25$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
+\Cref{FIG:LINREG} depicts the Bland-Altman as well as scatter plots 
+comparing the reference breath-hold Cartesian scan and 
+the proposed free-breathing radial scan. 
+For this quantitative analysis, three region of interests (ROI) 
+were selected for every subject and the mean value of every ROI 
+was used for plotting. 
+In the Bland-Altman plots, the x and y axis represents 
+the mean and difference values between these two scans, 
+respectively.
+The central dotted line along the x axis shows the mean bias 
+between these two scans, and is computed by averaging the difference values.
+The upper and lower dotted lines show the limits of agreement 
+(mean bias~$\pm$~1.96~$\times$~standard deviation of difference). 
+In the scatter plots, the x and y axis represents the mean values of 
+the Cartesian and the radial scan, respectively. 
+In addition, linear regression was performed. 
+The slope of the fitted curve for both FF and $R_2^*$ values is close to 1, 
+indicating good match between the Cartesian and the radial measurements.
+
+\cref{TAB:SubjectSTAT_FF,TAB:SubjectSTAT_R2S} further summarize 
+both the mean and the standard deviation values of every ROI and every patient. 
+Overall, the patients in this work cover wide ranges of FF and $R_2^*$ values, 
+and hence are representative for the validation of the proposed method. 
+Moreover, the quantitative analysis results reveal two important clinical indications.
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan8.pdf}
+	\caption{(A) Transversal view and (B) sagittal view 
+		of reconstructed FF and $R_2^*$ maps in Patient \#6 
+		comparing the reference breath-hold Cartesian scan and 
+		the proposed radial scan, respectively. 
+		This patient shows definite obesity symptom 
+		(see \cref{TAB:Subject}), but has no fatty liver. 
+		In fact, the FF values of this patient is the lowest 
+		among all subjects (see also \cref{FIG:LINREG}). 
+		Similar to the results of Patient \#1 in \cref{FIG:REGU}, 
+		the Cartesian scan suffers from fold-in artifacts in the $R_2^*$ maps 
+		(yellow arrows), while the proposed radial scan shows consistent $R_2^*$ values.}
+	\label{FIG:LPDFF}
+\end{figure}
+
+First, obese patients may not necessarily have fatty liver disease. 
+As shown in \cref{FIG:LPDFF}, Patient \#6 (listed in \cref{TAB:Subject}) 
+is diagnosed with obesity. 
+For this patient, however, ultrasound is not able to penetrate through 
+the thick subcutaneous fat layer to assess the liver fat content. 
+Both breath-hold Cartesian and free-breathing radial scans are able to 
+provide quantitative FF and $R_2^*$ maps. The liver regions exhibit 
+relatively dark color in the FF maps, i.e.~low FF values. 
+In fact, this patient even has the lowest FF and $R_2^*$ values 
+among all subjects in this study (see \cref{FIG:LINREG}). 
+The FF values from the proposed radial scan reads slightly lower than 
+the reference Cartesian scan. The reason might be due to the use of 
+magnitude discrimination for the calculation of FF 
+after model-based reconstruction. 
+On the other hand, the $R_2^*$ maps 
+in both the transversal and sagittal views 
+again suffer from hyper intensity in the Cartesian scan 
+(as pointed by yellow arrows), 
+while our proposed radial scan shows more homogeneous $R_2^*$ maps. 
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan9.pdf}
+	\caption{(A) Volunteer \#1 and (B) Patient \#9 
+		with elevated FF values, but no clear symptom of obesity.
+		In particular, Patient \#9 was diagnosed with hepatic steatosis 
+		by the standard liver biopsy and ultrasound.}
+	\label{FIG:HPDFF}
+\end{figure}
+
+Second, in our study, patients with hepatic steatosis may not necessarily be obese. 
+\Cref{FIG:HPDFF} displays one volunteer and one patient with elevated FF values from 
+both the reference breath-hold Cartesian and the free-breathing radial 
+scans. Patient \#9 was even confirmed about hepatic steatosis via 
+the standard liver biopsy and ultrasound diagnosis. 
+However, neither of them shows the problem of obesity (see \cref{TAB:Subject}). 
+Through \cref{FIG:LINREG} and \cref{FIG:HPDFF}, 
+we also observe that hepatic steatosis is more likely to occur for elderly patients. 
+Although fatty liver is also captured in the scan of Volunteer \#1, 
+this is rather a rare case among all young volunteers (results now shown here). 
+On the other hand, in the left corner of the liver in Patient \#9 
+(see the green arrows), 
+$R_2^*$ values from the Cartesian scan again seems higher, 
+possibly due to the fast $B_0$ change in this air-tissue interface, 
+where it is close to the stomach.
+
+
+\begin{figure*}
+	\centering
+	\includegraphics[width=\textwidth]{../../figures/tan10.pdf}
+	\caption{Comparison of FF and $R_2^*$ maps for Patients (A) \#3 and (B) \#8 
+		among the reference Cartesian scan, 
+		the free-breathing radial 2:47~min scan, 
+		and the free-breathing radial scan with retrospective two-fold undersampling. 
+		Note the ripple-like artifact in the $R_2^*$ map from the Cartesian scans 
+		due to incomplete breath hold (yellow arrows in the 1st row).}
+	\label{FIG:R2STAR}
+\end{figure*}
+
+Nothworthy, the reference Cartesian scan requires subjects to hold breath. 
+When subjects fail to perform breath holding, 
+it may lead to image artifacts in the reconstruction. 
+\Cref{FIG:HPDFF,FIG:R2STAR} (see yellow arrows) are such examples. 
+Residual respiratory motion during the scan 
+causes fast $B_0$ field drift \cite{tan_2019_mobawf} 
+as well as signal variation. 
+This situation makes the fitting of $B_0$ and $R_2^*$ difficult. 
+In this example, it results in ripple-like artifact (see yellow arrows) 
+and unreliable $R_2^*$ values. 
+However, the proposed free-breathing radial scan if free of such artifacts.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{../../figures/tan11.pdf}
+	\caption{Quantitative analysis of the reconstructed FF and $R_2^*$ maps 
+		from radial scans:~actual acquisition (2:47~\si{\minute}) and 
+		retrospectively undersampled acquisition (1:24~\si{\minute}), 
+		respectively.}
+	\label{FIG:USMP}
+\end{figure}
+
+Furthermore, we investigated reducing the acquired radial data by one half, 
+to explore the feasibility of the proposed motion-resolved model-based reconstruction 
+on retrospectively undersampled data. 
+As shown in \cref{FIG:R2STAR,FIG:USMP} as well as in the right column of 
+\cref{TAB:SubjectSTAT_FF,TAB:SubjectSTAT_R2S}, retrospective undersampling 
+increases standard deviation in the reconstructed FF and $R_2^*$ maps, 
+but the mean values agree well with the reconstruction on the 2:47~min scan (the center column).
+
+
+
+\section{Discussion}
+
+This work introduced a stack-of-radial multi-echo radial FLASH sequence 
+with partial Fourier readouts for volumetric free-breathing liver acquisition. 
+Moreover, this work introduced a regularized model-based reconstruction 
+in BART to jointly estimate liver water, fat, $R_2^*$, 
+$B_0$ field inhomogeneity maps, and coil sensitivity maps 
+directly from acquired $k$-space data. 
+This nonlinear inverse problem is solved by IRGNM with ADMM, 
+allowing for generalized regularization terms in nonlinear reconstruction. 
+To validate the proposed MRI sequence and reconstruction, 
+a pilot study is conducted comprising young volunteers and 
+patients diagnosed with obesity, diabetes, or hepatic steatosis. 
+The reconstructed FF and $R_2^*$ maps are further compared with 
+the reference breath-hold Cartesian scan. 
+We found good agreement between the proposed free-breathing radial scan 
+and the breath-hold Cartesian scan.
+
+\marginnote{R2.3}
+\hl{The patient $R_2^*$ maps from the proposed method look blurry 
+compared to the reference Cartesian scan, 
+while the volunteer $R_2^*$ map shows sharp delineation of the liver and vessel borders. 
+This may be due to the use of a larger FOV in the acquisition protocol for patients, 
+which corresponds to higher undersampling factor. 
+On the other hand, the larger body size of patients 
+may result in poorer receiver signal in the middle.}
+
+\marginnote{R2.7}
+\hl{In model-based reconstructions, parameter maps are directly reconstructed 
+from acquired $k$-space data. 
+Therefore, regularizations can be directly imposed on parameter maps. 
+An alternative approach is to reconstruct all echo images 
+and then perform image-space parameter fitting 
+\mbox{\cite{armstrong_2018_fat,zhong_2020_r2sclinic,zhong_2020_resr2s,wang_2022_mt-me,starekova_2022_fb-fat}}.
+In this case, advanced regularizations (e.g.~$\ell^1$-Wavelet and low rankness) 
+can be employed along the echo dimension. 
+However, this study mainly focused on the comparison 
+with the reference breath-hold Cartesian scan. 
+In addition, this study also compared with another model-based reconstruction approach 
+using spatial total variation regularization on parameter maps \mbox{\cite{schneider_2020_mobawfr2s}}. 
+It is evident in \mbox{\cref{FIG:REGU}} that spatial TV regularization on the parameter maps 
+can result in ink-type artifact, whereas temporal TV regularization is beneficial to remove 
+streaking artifacts.
+}
+
+\hl{initialization strategy\newline}
+
+There are several aspects in this study that can be further improved. 
+No patient participated in this study 
+showed symptoms of iron overload (i.e.~elevated $R_2^*$ values). 
+To the best of our knowledge, iron overload is more likely to be seen 
+in patients who require regular blood transfusion. 
+These patients, however, are rather rare in obesity/diabetes clinics. 
+Although lack of real patients, we showed the capability of our technique in 
+quantifying iron overload in the phantom, as seen in \cref{FIG:PHA}, 
+where Tube 3 results in the highest $R_2^*$ value due to iron. 
+
+Joint estimation of all physical parameter maps 
+and coil sensitivity maps is a nonlinear nonconvex inverse problem. 
+Especially when including the $B_0$ field inhomogeneity map as one unknown, 
+the reconstruction is sensitive to initialization and scaling of unknowns. 
+Our implementation initialized the $B_0$ map 
+with previously proposed three-echo reconstruction \cite{tan_2019_mobawf}, 
+which indeed fostered convergence. 
+Second, scaling of the fat, $R_2^*$, and $B_0$ maps was 
+empirically determined. Therefore, more intelligent $B_0$ estimation 
+and automatic scaling of unknowns \cite{tan_2017_scalemobaflow} 
+would be logical directions. 
+
+Compared with the reference breath-hold Cartesian scan, 
+our proposed radial sampling did not explore 
+$k_z$ unaligned undersampling strategies \cite{breuer_2005_caipi}, 
+which can further accelerate data acquisition.
+
+While this work focused on liver fat and $R_2^*$ mapping, 
+the presented multi-echo radial sequence in principle 
+is also applicable to brain imaging, which, 
+would become rather interesting in combination with 
+the above-mentioned $k_z$ undersampling. 
+Alternatively, one can also explore the possibility of 
+multiple parametric mapping 
+via extending the basic multi-echo radial acquisition to 
+variable flip angles or magnetization preparation.
+
+This work employed the recently proposed SSA-FARY technique 
+for self gating, where the determination of spokes as respiratory bins 
+was based on polar angles in the phase portrait plot. 
+This procedure did not take into account the radius of every spoke 
+in phase portrait, which might cause problems in the case of irregular breathing. 
+Therefore, it might make the self-gating technique more general taking the radius 
+into consideration. Alternatively, it would be interesting to use 
+pilot tone \cite{solomon_2021_pilot_tone} for prospective respiratory binning 
+during the course of data acquisition. 
+
+\marginnote{R3.9}
+\hl{The total reconstruction time for the whole liver took about \mbox{\SI{4}{\hour}} 
+on the Tesla V100 GPU. For clinical translation, 
+further acceleration could be achieved via 
+for example \mbox{$k_z$} undersampling, multiple GPU parallelization, 
+and pre-calibrated coil sensitivity maps. 
+These aspects, however, are outside the scope of this work, 
+which mainly focused on technical development 
+of the free-breathing model-based reconstruction method.}
+
+
+
+\section{Conclusion}
+
+This work introduced a free-breathing liver fat and $R_2^*$ quantification 
+technique, comprising stack-of-radial multi-echo asymmetric-echo acquisition and 
+regularized model-based reconstruction. 
+The generic model-based reconstruction framework in BART allows for 
+generalized regularization terms and is integrable with different physical models. 
+This work demonstrated the computational power of 
+the proposed nonlinear inverse reconstruction framework, 
+in which multiple temporal frames of 
+the physical parameter maps (water, fat, $R_2^*$, and $B_0$) 
+and coil sensitivity maps are jointly estimated. 
+This technique offers a non-invasive and non-physiological-gated tool 
+for liver assessment. 
+
+\begin{appendices}
+\crefalias{section}{appsec}
+
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+
+% =============================================== %
+% 		appendix A
+% =============================================== %
+\section{}
+\label{SEC:APPENDIXA}
+
+\setcounter{equation}{0}
+\renewcommand{\theequation}{A.\arabic{equation}}
+
+\noindent To minimize the cost function in \cref{EQU:obj_func}, 
+IRGNM linearizes the nonlinear forward model via Taylor expansion in each Newton step, 
+thus the data-consistency term in \cref{EQU:obj_func} becomes
+\begin{equation} \label{EQU:lin_problem}
+\norm{DF(x_n) \text{d} x - [ y - F(x_n) ] }_2^2
+\end{equation}
+where the Jacobian $DF(x_n)$ denotes the derivative of the forward operator 
+with regard to the $n$th-step estimate. 
+Given the initial guess as $x_0$ \cite{uecker_2008_nlinv}, 
+one can denote $x = x_{n+1} - x_0 = x_{n} + \text{d} x - x_0$. 
+As a result, \cref{EQU:lin_problem} becomes
+\begin{equation}
+\begin{aligned}
+&\norm{DF(x_n) (x + x_0 - x_n) - [ y - F(x_n) ] }_2^2 \\
+\Rightarrow &\norm{DF(x_n) x -[ DF(x_n) (x_n - x_0) +  y - F(x_n) ] }_2^2
+\end{aligned}
+\end{equation}
+whose minimum occurs when its derivative is set to $0$, and we obtain such a linear system equation,
+\begin{equation} \label{EQU:lsqr}
+A x = b
+\end{equation}
+for which we denote $A := DF^H (x_n) DF(x_n)$ and $b := DF^H (x_n) \big\{ DF(x_n) (x_n - x_0) +  y - F(x_n) \big\}$.
+
+With generalized $\ell1$ regularization, \cref{EQU:lsqr} can be written in the ADMM form,
+\begin{equation} \label{EQU:ADMM_LASSO}
+\begin{split}
+\textrm{minimize}\;\; &\norm{Ax - b}_2^2 + \alpha \norm{z}_1 \\
+\textrm{subject to}\;\; &Tx - z = 0
+\end{split}
+\end{equation}
+The updates can be derived,
+\begin{equation} \label{EQU:ADMM_LASSO_upd}
+\left\{\begin{matrix}
+\begin{aligned}
+x^{(k+1)} &:= (A^H A + \rho T^H T / 2) [A^H b + \rho T^H (z^{(k)} - \mu^{(k)})/2] \\ 
+z^{(k+1)} &:= \mathcal{T}_{\alpha/\rho} (T x^{(k+1)} + \mu^{(k)}) \\
+u^{(k+1)} &:= u^{(k)} + T x^{(k+1)} - z^{(k+1)}
+\end{aligned}
+\end{matrix}\right.
+\end{equation}
+The $x$ update is solved by the conjugate gradient method, 
+and the $z$ update is computed via soft thresholding ($\mathcal{T}_{\alpha/\rho}$), 
+where $\alpha$ is passed from IRGNM and iteratively reducing along Newton steps, 
+$\alpha = 1/D^{n-1}$ with $D > 1$ and $n$ the $n$the Newton iteration. 
+$\rho$ is known as the penalty parameter in ADMM. 
+
+% =============================================== %
+% 		appendix B
+% =============================================== %
+\section{}
+\label{SEC:APPENDIXB}
+
+The iterative solution to \cref{EQU:lsqr} requires the computation of the Jacobian $DF(x)$ 
+and its corresponding adjoint $DF^H (x)$ operator, with the forward operator $F(x)$ denoted 
+in \cref{EQU:op_fwd}. 
+Note that the forward operator can be split into 
+two nonlinear operators:~the parallel imaging operator ($P\mathcal{F} M \mathcal{S}$) 
+and multi-echo signal model operator ($\mathcal{B}$). 
+Since the first one has already been implemented 
+in BART for NLINV \cite{uecker_2008_nlinv}, 
+only the second operator is required to be implemented.
+Afterwards, the two nonlinear operators can be chained together. 
+Therefore, only the operator $B$ is explained in details here.
+
+As denoted in \cref{EQU:meco_wfr2s}, the nonlinear operator $\mathcal{B}$ presents the mapping 
+from the parameter maps ($\text{W}, \text{F}, R_2^*, f_{B_0}$) 
+to the multi-echo images ($\rho_m$), thus 
+\begin{equation} \label{EQU:B_mapping}
+\mathcal{B} : \mathbb{C}^{N^2 \times N_p} \mapsto \mathbb{C}^{N^2 \times E} \; .
+\end{equation}
+Here, $N^2$ denotes the image size, $N_p$ the number of parameter maps 
+(4 in this case) and $E$ the number of echoes.
+Therefore, its Jacobian matrix $D \mathcal{B} \in \mathbb{C}^{N^2 \times E \times N_p}$. 
+Denote $\mathcal{B}_m$ as the operator output corresponding to the $m$th TE, 
+its corresponding Jacobian is
+%\begin{strip}
+\begin{multline*}
+D\mathcal{B}_m = 
+\begin{pmatrix}[2]
+\frac{\partial \mathcal{B}_m}{\partial \text{W}} \\
+\frac{\partial \mathcal{B}_m}{\partial \text{F}} \\
+\frac{\partial \mathcal{B}_m}{\partial {R_2^*}} \\
+\frac{\partial \mathcal{B}_m}{\partial f_{B_0}}
+\end{pmatrix}^T \\ = 
+\begin{pmatrix}[1.5]
+\begin{array}{r}
+e^{-{R_2^*} \text{TE}_m} \cdot e^{i2\pi f_{B_0} \text{TE}_m} \\
+z_m \cdot e^{-{R_2^*} \text{TE}_m} \cdot e^{i2\pi f_{B_0} \text{TE}_m} \\
+\text{F} \cdot z_m \cdot \Big( (-\text{TE}_m) e^{-{R_2^*} \text{TE}_m} \Big) \cdot e^{i2\pi f_{B_0} \text{TE}_m} \\
+\Big( \text{W} + \text{F} \cdot z_m \Big) \cdot e^{-{R_2^*} \text{TE}_m} \cdot (i2\pi \text{TE}_m) \cdot e^{i2\pi f_{B_0} \text{TE}_m}
+\end{array}
+\end{pmatrix}^T
+\end{multline*}
+%\end{strip}
+The adjoint operator is then its complex conjugate transpose.
+
+
+% =============================================== %
+% 		appendix C
+% =============================================== %
+%\section{}
+%\label{SEC:APPENDIXC}
+%
+%The geometry of the water/fat \& iron phantom is shown in \cref{SUPPFIG:PHA_WFIRON}. 
+%The solution of every tube is listed in \cref{SUPPTAB:PHA}.
+%
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=0.9\columnwidth]{../figures/supp_tan1.pdf}
+%	\caption{Photos of the constructed water/fat \& iron phantom. 
+%		(A) 34.5~mg iron nano particle diluted in 100~mL distilled water.
+%		(B) Phantom layout with eight tubes as listed in (C).}
+%	\label{SUPPFIG:PHA_WFIRON}
+%\end{figure}
+%
+%\begin{table*}[t]
+%	\caption{Measured volume of iron, water and peanut oil solutions for the eight tubes}
+%	\setlength{\tabcolsep}{3pt}
+%	\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth} m{0.1\textwidth}}
+%		\toprule
+%		Solution (\si{\milli\liter}) & Tube 1 & Tube 2 & Tube 3 & Tube 4 & Tube 5 & Tube 6 & Tube 7 & Tube 8 \\
+%		\hline
+%		Iron  &  0.5 &  1.0 &  2.0 &  0 &  0.5 &  1.0 &  0 &  0 \\
+%		Water & 50   & 50   & 50   & 45 & 45   & 45   & 40 &  0 \\
+%		Fat   &  0   &  0   &  0   &  5 &  5   &  5   & 10 & 50 \\
+%		\bottomrule
+%	\end{tabular}
+%	\label{SUPPTAB:PHA}
+%\end{table*}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=0.9\columnwidth]{../figures/supp_tan2.pdf}
+%	\caption{Quantitative analysis of FF values 
+%		for first seven tubes via linear regression 
+%		between the standard MR Spectroscopy (MRS) 
+%		and the proposed multi-echo radial acquisition 
+%		with model-based reconstruction. 
+%		Tube 8 (filled with peanut oil) is excluded for the analysis 
+%		due to the lack of its MRS measurement.}
+%	\label{SUPPFIG:PHA_LINFIT}
+%\end{figure}
+
+\end{appendices}
+
+\section*{Acknowledgment}
+
+Z.~T.~sincerely thanks Ms.~Sarina Tepan 
+for the organization of patients to evaluate the proposed method. 
+Z.~T.~also thanks Drs.~Jens Frahm, Li Feng, and Kai Tobias Block 
+for various discussions.
+Z.~T.~and M.~U.~thank DFG for the research grant 
+on TA 1473/2-1 and UE 189/4-1 (Project number: 427934942). 
+
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+\end{document}
