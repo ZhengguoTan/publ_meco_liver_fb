@@ -263,7 +263,8 @@ Its fitting model is the same as in Equation (3).
 
 	\item \textit{For the reference method, was the breath-hold after expiration or inspiration? For figures that show only one respiratory phase, which was it: end expiration or end inspiration? Comparisons should choose the same phase as the breath-hold to minimize respiratory mismatch and ensuing differences in R2*.}
 
-\hspace{1em} The breath-hold was performed after expiration.
+\hspace{1em} The breath-hold was performed after expiration. 
+The end expiration phase was used for comparison.
 
 	\item \textit{Was shimming done after expiration, inspiration, or during free breathing? This may provide further context to any differences in R2* between the breath-held and free-breathing scan.}
 
@@ -284,9 +285,11 @@ Patient \#6 is lower than the reference Cartesian scan,
 as shown in Figure 7 and Table IV in the manuscript.
 
 \hspace{1em} As suggested, we compared three FF calculation methods: 
-$|\mathrm{F}|/(|\mathrm{W} + \mathrm{F}|)$, 
-$1 - |\mathrm{W}|/(|\mathrm{W} + \mathrm{F}|)$, and 
-$1 - |\mathrm{W}|/(|\mathrm{W}| + |\mathrm{F}|)$. 
+\begin{itemize}
+	\item $|\mathrm{F}|/(|\mathrm{W} + \mathrm{F}|)$, 
+	\item $1 - |\mathrm{W}|/(|\mathrm{W} + \mathrm{F}|)$, and 
+	\item $1 - |\mathrm{W}|/(|\mathrm{W}| + |\mathrm{F}|)$. 
+\end{itemize}
 The latter two methods use magnitude discrimination.
 \cref{SUPPFIG:FATFRAC} shows the corresponding FF maps from Patient \#6 and \#9, respectively.
 Mean and standard deviation of three region of interests from the calculated FF maps are listed 
@@ -389,10 +392,18 @@ In addition, we have also emphasized our work in Introduction and Theory.
 
 	\item \textit{For the model-based reconstruction, the initialization seems to be problematic. As the authors mentioned in the manuscript, the W, F and $f_{B_0}$ need to be initialized using another model-based method. This significantly affects the effectiveness of the whole reconstruction algorithm. If an algorithm has to use some very good initial guess from somewhere else, then it's hard to appreciate the current used method. Is it possible to come up with a way so that the reconstruction will work for a more general initialization in this work as this is urgently needed for this work (not future work)?}
 
+\hspace{1em} Initialization in nonlinear inverse problems is not a trivial task. 
+The recent proposal on identifying solution interval 
+\footnote{Zhang G, et al. Taking the guess work out of the initial guess: A solution interval method for least-squares parameter estimation in nonlinear models. \textit{J Comput Inf Sci Eng} 2021;21:021011.}
+reads a general initialization strategy, but requires abundant computational power 
+(e.g.~solving the nonliear inverse problem multiple times to construct solution intervals).
+
 \hspace{1em} Only $f_{B_0}$ is initialized from the 3-echo model-based reconstruction. 
 We have corrected this in the manuscript. 
-Note that Schneider et al.~pre-calibrated the $B_0$ map instead (This calibrated $B_0$ map is kept constant during model-based reconstruction). 
-Our work already allowed for the joint update of $B_0$ maps for every respiratory bins.
+Note that Schneider et al.~pre-calibrated the $B_0$ map instead 
+(This calibrated $B_0$ map was kept constant during model-based reconstruction). 
+Our work already allowed for the joint update of $B_0$ maps for every respiratory bins. 
+
 
 
 	\item \textit{From the results shown in the manuscript, seems that the fat fraction and $R_2^*$ estimated from the proposed scheme is consistently higher than the estimation from the breath-hold cartesian data. Is this excepted? I think a phantom study is needed to investigate this problem so that we may know which estimation is more accurate.}
@@ -401,15 +412,15 @@ Our work already allowed for the joint update of $B_0$ maps for every respirator
 estimated from the proposed scheme are consistently higher than 
 the reference breath-hold Cartesian scan. First, beside the Bland-Altman plots, 
 we have also included scatter plots in Figure 7 in the manuscript. 
-These plots show good match between the proposed radial and the reference Cartesian methods. 
 Second, Tables IV and V in the manuscript summarize the mean and standard deviation values 
 of all ROIs and all patients. 
+Both plots and tables show good match between the proposed radial and the reference Cartesian methods.
 
 	\item \textit{One of the goals of this work is to estimated the $B_0$ filed maps and coil sensitivity maps. But there is no result on the coil sensitivity maps is shown in the manuscript, and there is no $B_0$ filed map result for in vivo datasets. Since the authors proposed to estimate the $B_0$ filed maps and coil sensitivity maps, the results of $B_0$ filed maps and coil sensitivity maps should be shown in the manuscript. I am curious to see the coil sensitivity map estimation comparing to other coil sensitivity map estimation methods (e.g. ESPIRiT or J-SENSE coil sensitivity map estimation).}
 
 \hspace{1em} Thank you for the suggestion. $B_0$ field maps have been added to Figure 6 in the manuscript. In addition, \cref{SUPPFIG:SENS} shows the coil sensitivity maps estimated 
 from the proposed model-based reconstruction and ESPIRiT 
-\footnote{Uecker M, et al. ESPIRiT -- An eigenvalue approach to autocalibrating parallel MRI: Where SENSE meets GRAPPA. \textit{Magn Reson Med} 2014;71:990--1001}, respectively.
+\footnote{Uecker M, et al. ESPIRiT -- An eigenvalue approach to autocalibrating parallel MRI: Where SENSE meets GRAPPA. \textit{Magn Reson Med} 2014;71:990--1001.}, respectively.
 
 \begin{figure}[t]
 	\centering
