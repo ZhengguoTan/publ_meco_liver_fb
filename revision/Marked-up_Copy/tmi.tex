@@ -1023,7 +1023,15 @@ Recently, Zhang et al.~proposed the solution interval method for nonlinear inver
 \mbox{\cite{zhang_2021_nlls_init}}. 
 However, abundant computation power is required to 
 run the nonlinear least square fitting multiple times 
-for the construction of solution intervals for every unknown.}
+for the construction of solution intervals for every unknown.
+In general, nonlinear inverse problems consisting of non-convex phase variation 
+is not trivial to be solved. 
+Similar problems exist in multi-shot diffusion MRI as well. 
+Recently, Hu et al.~\mbox{\cite{hu_2020_spa_llr}} proposed to 
+jointly estimate diffusion-weighted magnitude and phase images 
+to resolve the shot-to-shot phase variation. 
+Similar to our work, this approach solves a non-linear non-convex inverse problem, 
+but still requires good phase initialization.}
 
 There are several aspects of this study that can be further improved. 
 No patient participated in this study 
@@ -1072,22 +1080,28 @@ pilot tone \cite{solomon_2021_pilot_tone} for prospective respiratory binning
 during data acquisition. 
 
 \marginnote{R3.9}
-\hl{The total reconstruction time for the whole liver took about \mbox{\SI{4}{\hour}} 
+The total reconstruction time for the whole liver took about \mbox{\SI{4}{\hour}} 
 on the Tesla V100 GPU. For clinical translation, 
 further acceleration could be achieved via 
-for example \mbox{$k_z$} undersampling, multiple GPU parallelization, 
-and pre-calibrated coil sensitivity maps. 
+for example multiple GPU parallelization. 
+This includes two aspects. 
+First, the proposed reconstruction algorithm 
+can be parallelized with multiple GPUs 
+to accelerate the iterative minimization procedure.
+Second, currently slices are reconstructed in a sequential manner. 
+This can be modified to distribute the slice reconstruction in parallel 
+to further speed up the whole process.
 These aspects, however, are outside the scope of this work, 
 which mainly focused on the technical development 
-of the free-breathing model-based reconstruction method.}
+of the free-breathing model-based reconstruction method.
 
 
 
 \section{Conclusion}
 
 This work introduced a free-breathing liver fat and $R_2^*$ quantification 
-technique, comprising stack-of-radial multi-echo asymmetric-echo acquisition and 
-regularized model-based reconstruction. 
+technique, comprising stack-of-radial multi-echo asymmetric-echo volumetric continuous acquisition 
+and regularized non-linear model-based reconstruction. 
 The generic model-based reconstruction framework in BART allows for 
 generalized regularization terms and is integrable with different physical models. 
 This work demonstrated the computational power of 
@@ -1095,8 +1109,10 @@ the proposed nonlinear inverse reconstruction framework,
 in which multiple temporal frames of 
 the physical parameter maps (water, fat, $R_2^*$, and $B_0$) 
 and coil sensitivity maps are jointly estimated. 
+The proposed method is validated with the reference breath-hold Cartesian scan and 
+is compared with another recent approach employs spatial TV regularization. 
 This technique offers a non-invasive and non-physiological-gated tool 
-for liver assessment. 
+for quantitative liver assessment. 
 
 \begin{appendices}
 \crefalias{section}{appsec}
@@ -1263,7 +1279,7 @@ The adjoint operator is then its complex conjugate transpose.
 
 Z.~T.~sincerely thanks Ms.~Sarina Tepan 
 for the organization of patients to evaluate the proposed method. 
-Z.~T.~also thanks Drs.~Jens Frahm, Li Feng, and Kai Tobias Block 
+Z.~T.~also thanks Drs.~Jens Frahm and Kai Tobias Block 
 for various discussions.
 Z.~T.~and M.~U.~thank DFG for the research grant 
 on TA 1473/2-1 and UE 189/4-1 (Project number: 427934942). 
