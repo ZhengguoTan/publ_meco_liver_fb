@@ -58,14 +58,14 @@ to improve temporal resolution and shorten scan time.
 As shown in \cref{SUPPTAB:Protocol}, we compare the protocols 
 with asymmetric echoes (green column) and 
 symmetric echoes (yellow column). 
-From the table, we can see that asymmetric echoes allows for:
+From the table, we can see that the use of asymmetric echoes allows for:
 
 \begin{itemize}
-	\item asymmetric TE,
+	\item reduced TE,
 	\item shorter TR ($8.39$~ms),
 	\item shorter scan time,
 	\item larger FOV.
-\end{itemize}
+\end{itemize} 
 
 \begin{table}[h]
 	\centering
@@ -116,6 +116,8 @@ it further elongates the scan time. On the other hand, reduced TR in the asymmet
 \end{figure}
 
 
+%FIXME: Improvement in manuscript?
+
 	\item \textit{The description of the model based reconstruction in Eq. [5] needs to be expanded including the temporal dimension, the main unknowns and mathematical expressions for the E1 and E2 operators. The authors should also add to the formulation the Sobolev-norm weighting used for the field-map estimation. A separate formula should be included for the cost function minimized when only a L2 regularization is used, as showed later in the results section.}
 
 \hspace{1em} Done.
@@ -124,7 +126,8 @@ it further elongates the scan time. On the other hand, reduced TR in the asymmet
 
 \hspace{1em} The work by Schneider et al.~employed spatial TV regularization 
 on the water, fat, and $R_2^*$ maps, whereas $B_0$ field inhomogeneity and 
-coil sensitivity maps were pre-calibrated. A comparison has been provided in Figure 5.
+coil sensitivity maps were pre-calibrated and kept fixed. A comparison is
+now provided in Figure 5.
 
 	\item \textit{The present work does not include important literature on the topic. Beyond the work by Schneider et al, there has been a significant amount of work aiming to perform free breathing liver PDFF and R2* mapping in DOI 10.1002/mrm.26693, DOI: 10.1002/mrm.28052 and many others. Please discuss the present work in the context of all previous works on the topic.}
 
@@ -156,7 +159,7 @@ coil sensitivity maps were pre-calibrated. A comparison has been provided in Fig
 
 	\item \textit{Introduction: “This work enables high-resolution free-breathing volumetric liver quantitative mapping with reduced scan time”. Where was it shown that the scan time was reduced?}
 
-\hspace{1em} Please refer to Figure 10.
+\hspace{1em} Please refer to Figure 10. %FIXME: reduced to Scheinder et al. ???
 
 	\item \textit{Figure 6 could be enhanced by showing B0 maps at the 4 different bins to better highlight the reason for the R2* map overestimation at the upper liver region.}
 	
@@ -184,7 +187,7 @@ which shows water/fat swapping artifacts. Therefore, we used MRS instead.
 
 	\item \textit{The phantom analysis currently ignores the ground truth fat fraction values, which are known by design. According to table I, tubes should be at 0\%, 10\%, 20\%, and 100\%. However, they are instead at 0\%, 13-14\%, 23-24\%, and not shown for both radial and MRS in Fig. 4. Why is fat being overestimated by both methods? MRS was not performed in the 100\% tube, but what was the radial value?}
 
-\hspace{1em} The fat fraction values are "overestimated" due to the preparation of the phantom. We noticed steams coming from the water solution, which was heated at the hotplate at \SI{300}{\celsius} to create phantom emulsion. Therefore, the loss of water solution in the emulsion step resulted in "overestimation" of the fat fraction values.
+\hspace{1em} The fat fraction values are "overestimated" due to the preparation of the phantom. We noticed steam coming from the water solution, which was heated at the hotplate at \SI{300}{\celsius} to create phantom emulsion. Therefore, the loss of water solution in the emulsion step resulted in "overestimation" of the fat fraction values. %FIXME: second question not answered
 
 	\item \textit{The radial R2* maps are quite blurry near the anterior-posterior midline in all patients (but not the volunteer), obscuring blood vessels that are visible in the Cartesian scan. This presumably causes some partial voluming issues for liver tissue quantification, and contradicts the subjective claim that the R2* maps are "sharp". Please discuss this observation, as well as any potential sources (e.g. poor coil sensitivity penetration deep in the body?).}
 
@@ -193,10 +196,9 @@ which shows water/fat swapping artifacts. Therefore, we used MRS instead.
 	\item \textit{When discussing differences in R2* between breath-held Cartesian and the proposed method, the manuscript seems to give the benefit of the doubt to the proposed method (the Cartesian scan is described as "overestimated" or "underestimated"), even though the Cartesian breath-held scan is the (presumably regulatory-approved product) reference sequence.}
 
 \hspace{1em} We acknowledge that the Cartesian breath-hold scan is the reference sequence. 
-However, we observed in this study that in cases of incomplete breath hold 
+However, we observed in this study that in cases of incomplete breath hold 	%FIXME How known?
 (Volunteer \#1, Patients \#8 \& \#9), 
-the reference sequence suffers from underestimated $R_2^*$, or in other words motion artifacts, 
-as shown in Figures 5, 9 and 10.
+the reference sequence suffers from underestimated $R_2^*$, 
 
 	\item \textit{There is a parallelogram shape to the Bland-Altman FF plot in Fig. 7. This usually indicates some clipping in values for one or both methods. With magnitude discrimination, this could make sense on the bottom end of the FF range (water is more prevalent in this tissue), but these values are not near the high end of the FF range and should not be clipping there. There is also a potential negative slope to the differences, which may indicate that one method measured reduced population variablity. Both of these questions would be aided by the addition of scatter plots to Fig. 7, and the second question would be aided by the addition of a table with population descriptive statistics of FF and R2* over the subjects.}
 
@@ -239,8 +241,8 @@ solved the quantification problem in two steps:
 (1) reconstruction of all echo images, and (2) image-space parameter fitting. 
 
 \hspace{1em} Another relevant work based on model-based reconstruction is from Schneider et al., 
-which employed spatial total variation regularization on parameter maps. 
-Moreover, Schneider et al.~pre-calibrated $B_0$ and coil sensitivity maps, 
+which employed spatial total variation regularization on parameter maps and used
+	pre-calibrated $B_0$ and coil sensitivity maps, 
 which were then kept constant during model-based reconstruction.
 
 \end{enumerate}
@@ -360,7 +362,7 @@ is not feasible as it will require longer breath hold.
 	\item \textit{The discussion also says that with unaligned kz undersampling, "expensive 3D image reconstruction would be required". This is 3D reconstruction already, not slice-by-slice, right? Or is the smoothness on B0 and coil maps only being imposed in the x-y plane? Please clarify.}
 
 \hspace{1em} Thank you for the question. For the stack-of-stars acquisition, 
-3D k-space data is firstly to slices via 1D FFT along the $k_z$ dimension. 
+3D k-space data is decoupled into slice using an 1D FFT along the $k_z$ dimension. 
 Afterwards, reconstruction can be done for every slice. 
 Therefore, the smoothness on $B_0$ and coil maps is imposed in the x-y plane.
 
@@ -400,14 +402,14 @@ In addition, we have also emphasized our work in Introduction and Theory.
 
 	\item \textit{For the model-based reconstruction, the initialization seems to be problematic. As the authors mentioned in the manuscript, the W, F and $f_{B_0}$ need to be initialized using another model-based method. This significantly affects the effectiveness of the whole reconstruction algorithm. If an algorithm has to use some very good initial guess from somewhere else, then it's hard to appreciate the current used method. Is it possible to come up with a way so that the reconstruction will work for a more general initialization in this work as this is urgently needed for this work (not future work)?}
 
-\hspace{1em} Initialization in non-convex inverse problems is not a trivial task. 
+\hspace{1em} Initialization in non-convex inverse problems is not a trivial task. %FIXME: needs better answer
 The recent proposal on identifying solution interval 
 \footnote{Zhang G, et al. Taking the guess work out of the initial guess: A solution interval method for least-squares parameter estimation in nonlinear models. \textit{J Comput Inf Sci Eng} 2021;21:021011.}
 reads a general initialization strategy, but requires abundant computational power 
 (e.g.~solving the nonliear inverse problem multiple times to construct solution intervals).
 
 \hspace{1em} Only $f_{B_0}$ is initialized from the 3-echo model-based reconstruction. 
-We have corrected this in the manuscript. 
+We have corrected this in the manuscript.  %FIXME What?
 Note that Schneider et al.~pre-calibrated the $B_0$ map instead 
 (This calibrated $B_0$ map was kept constant during model-based reconstruction). 
 Our work already allowed for the joint update of $B_0$ maps for every respiratory bins. 
