@@ -198,7 +198,7 @@ which shows water/fat swapping artifacts. Therefore, we used MRS instead.
 \hspace{1em} We acknowledge that the Cartesian breath-hold scan is the reference sequence. 
 However, we observed in this study that in cases of incomplete breath hold 
 (Volunteer \#1, Patients \#8 \& \#9), 
-the reference sequence suffers from underestimated $R_2^*$ and motion artifacts, 
+the reference sequence suffers from underestimated $R_2^*$ and motion artifacts
 as shown in Figures 5, 9 and 10.
 
 	\item \textit{There is a parallelogram shape to the Bland-Altman FF plot in Fig. 7. This usually indicates some clipping in values for one or both methods. With magnitude discrimination, this could make sense on the bottom end of the FF range (water is more prevalent in this tissue), but these values are not near the high end of the FF range and should not be clipping there. There is also a potential negative slope to the differences, which may indicate that one method measured reduced population variablity. Both of these questions would be aided by the addition of scatter plots to Fig. 7, and the second question would be aided by the addition of a table with population descriptive statistics of FF and R2* over the subjects.}
@@ -244,6 +244,8 @@ solved the quantification problem in two steps:
 \hspace{1em} Another relevant work based on model-based reconstruction is from Schneider et al., 
 which employed spatial or temporal total variation regularization on parameter maps. 
 Moreover, Schneider et al.~pre-calibrated $B_0$ and coil sensitivity maps, 
+which employed spatial total variation regularization on parameter maps and used
+	pre-calibrated $B_0$ and coil sensitivity maps, 
 which were then kept constant during model-based reconstruction.
 
 \end{enumerate}
@@ -395,7 +397,7 @@ Therefore, the smoothness on $B_0$ and coil maps is imposed in the x-y plane.
 another contribution of this work is the model-based reconstruction, 
 which jointly estimates all parameter maps (water, fat, $R_2^*$ and $B_0$) and 
 coil sensitivity maps directly from the measured $k$-space data. 
-In addition, we have also emphasized our work in Introduction and Theory.
+We emphasized this  in Introduction and Theory.
 
 	\item \textit{The notations in the manuscript are not well-explained. At least all the used notations should be explained. The authors should pay much more attention to the notations used in the manuscript to make all the equations clear. For example, I am confused by the second part of eq. (4). I think more explanations are needed here for eq. (4). Another example is that in eq. (5), what is $\mathcal{L}$? And the $E_1$ and $E_2$ operators are pretty abstract.}
 
@@ -403,18 +405,17 @@ In addition, we have also emphasized our work in Introduction and Theory.
 
 	\item \textit{For the model-based reconstruction, the initialization seems to be problematic. As the authors mentioned in the manuscript, the W, F and $f_{B_0}$ need to be initialized using another model-based method. This significantly affects the effectiveness of the whole reconstruction algorithm. If an algorithm has to use some very good initial guess from somewhere else, then it's hard to appreciate the current used method. Is it possible to come up with a way so that the reconstruction will work for a more general initialization in this work as this is urgently needed for this work (not future work)?}
 
-\hspace{1em} Initialization in non-convex inverse problems is not a trivial task. 
-The recent proposal on identifying solution interval 
-\footnote{Zhang G, et al. Taking the guess work out of the initial guess: A solution interval method for least-squares parameter estimation in nonlinear models. \textit{J Comput Inf Sci Eng} 2021;21:021011.}
-reads a general initialization strategy, but requires abundant computational power 
-(e.g.~solving the nonliear inverse problem multiple times to construct solution intervals).
+\hspace{1em} Only $f_{B_0}$ is initialized from the 3-echo model-based reconstruction.
+We have corrected this in the manuscript and applogize for the error.
 
-\hspace{1em} Only $f_{B_0}$ is initialized from the 3-echo model-based reconstruction. 
-We have corrected this in the manuscript.  %FIXME What?
-Note that Schneider et al.~pre-calibrated the $B_0$ map instead 
-(This calibrated $B_0$ map was kept constant during model-based reconstruction). 
-Our work already allowed for the joint update of $B_0$ maps for every respiratory bins. 
-
+We do not understand why the reviewer thinks that this affects the effectiveness
+of this work. We would like to stress that no separate calibration scan is required:
+a subset of the data is used in a simplified reconstruction (not a completely different one)
+to estimate a rough initial guess.  Thus, no additional calibration scans are required,
+and the initially estimated  guess of $B_0$ is then further improved in the full
+reconstruction.  The initial reconstruction could be understood as a simplified
+first iteration.  We added more explanations and also results that show that
+further updates of $B_0$ can improve the result relative to using a fixed initial estimate.
 
 
 	\item \textit{From the results shown in the manuscript, seems that the fat fraction and $R_2^*$ estimated from the proposed scheme is consistently higher than the estimation from the breath-hold cartesian data. Is this excepted? I think a phantom study is needed to investigate this problem so that we may know which estimation is more accurate.}
@@ -423,7 +424,7 @@ Our work already allowed for the joint update of $B_0$ maps for every respirator
 estimated from the proposed scheme are consistently higher than 
 the reference breath-hold Cartesian scan. First, beside the Bland-Altman plots, 
 we have also included scatter plots in Figure 7 in the manuscript. 
-Second, Tables IV and V in the manuscript summarize the mean and standard deviation values 
+Tables IV and V in the manuscript summarize the mean and standard deviation values 
 of all ROIs and all patients. 
 Both plots and tables show good match between the proposed radial and the reference Cartesian methods.
 
@@ -455,14 +456,14 @@ from nonlinear inversion and ESPIRiT.
 
 	\item \textit{For the phantom study, why don't the authors also do the Cartesian scan and compared the results obtained from the Cartesian scan with the results using the proposed sequence? If so, we can have a better understanding about the effectiveness of the proposed scheme.}
 
-\hspace{1em} For the phantom study, we encountered some difficulty using the reference Cartesian scan. 
-Therefore, we used MRS instead.
+\hspace{1em} For the phantom study, we encountered difficulty using the reference Cartesian scan which
+was affected by water-fat swaps. Therefore, we used MRS instead.
 
 	\item \textit{In Fig.5, which shows the results from Patient \#1, I can clearly see that the there is heavy blurring, which affects the estimation (e.g., the estimation of the liver region in the left bottom of the image are strongly affected by the blurring). I am not sure the blurring comes from the too strong regularization or it comes from the less number of bins (only 4 bins are used). But definitely this issue needs to be further investigated.}
 
 \hspace{1em} As shown in Table III in the manuscript, Patient \#1 has relatively large body size, 
-which may cause poor coil sensitivity penetration in the body, as mentioned by Reviewer 2. 
-On the other hand, to investigate whether the use of 4 respiratory bins is insufficient 
+which may cause lower coil sensitivities in the body, as mentioned by Reviewer 2. 
+To investigate whether the use of 4 respiratory bins is insufficient 
 to resolve motion, we display in \cref{SUPPFIG:BINS} the reconstruction results 
 from Patient \#1, \#2 and \#9 with 4, 7, and 10 bins, respectively.
 Admittedly, the result from Patient \#1 is more blurry than other patients. 
@@ -479,8 +480,9 @@ Increasing the number of respiratory bins does not seem to reduce blurring.
 
 	\item \textit{In Section III. B, it says "Further, we investigated the effectiveness of the proposed motion-resolved ......, which corresponds to half of the total scan time." I am not sure what does this mean. Can you explain more?}
 
-\hspace{1em} This means that we retrospectively cut out the second half of the acquired data. 
-With the reduced data, we then perform image reconstruction.
+\hspace{1em} This means that we retrospectively removed the second half of the acquired data.
+With the reduced data, we then perform image reconstruction. We improved the description
+in the manuscript.
 
 	\item \textit{The reconstruction time takes about 4 hours, even with only 4 bins and using the Tesla V100 GPU. I think to make the work stronger and gain more practical value, it is worthwhile for considering more on how to speed up the reconstruction.}
 
