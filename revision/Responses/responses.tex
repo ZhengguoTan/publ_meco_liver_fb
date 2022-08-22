@@ -178,7 +178,9 @@ coil sensitivity maps were pre-calibrated. A comparison has been provided in Fig
 \begin{enumerate}
 	\item \textit{For the phantom study, the Cartesian reference maps should be shown. If it was not acquired, the phantom experiment should be re-run to add it.}
 
-\hspace{1em} For the phantom study, we encountered some difficulty using the reference Cartesian scan. Therefore, we used MRS instead.
+\hspace{1em} For the phantom study, 
+we encountered some difficulty using the reference Cartesian scan, 
+which shows water/fat swapping artifacts. Therefore, we used MRS instead.
 
 	\item \textit{The phantom analysis currently ignores the ground truth fat fraction values, which are known by design. According to table I, tubes should be at 0\%, 10\%, 20\%, and 100\%. However, they are instead at 0\%, 13-14\%, 23-24\%, and not shown for both radial and MRS in Fig. 4. Why is fat being overestimated by both methods? MRS was not performed in the 100\% tube, but what was the radial value?}
 
@@ -191,7 +193,8 @@ coil sensitivity maps were pre-calibrated. A comparison has been provided in Fig
 	\item \textit{When discussing differences in R2* between breath-held Cartesian and the proposed method, the manuscript seems to give the benefit of the doubt to the proposed method (the Cartesian scan is described as "overestimated" or "underestimated"), even though the Cartesian breath-held scan is the (presumably regulatory-approved product) reference sequence.}
 
 \hspace{1em} We acknowledge that the Cartesian breath-hold scan is the reference sequence. 
-However, we observed in this study that in cases of incomplete breath hold, 
+However, we observed in this study that in cases of incomplete breath hold 
+(Volunteer \#1, Patients \#8 \& \#9), 
 the reference sequence suffers from underestimated $R_2^*$, or in other words motion artifacts, 
 as shown in Figures 5, 9 and 10.
 
@@ -392,7 +395,7 @@ In addition, we have also emphasized our work in Introduction and Theory.
 
 	\item \textit{For the model-based reconstruction, the initialization seems to be problematic. As the authors mentioned in the manuscript, the W, F and $f_{B_0}$ need to be initialized using another model-based method. This significantly affects the effectiveness of the whole reconstruction algorithm. If an algorithm has to use some very good initial guess from somewhere else, then it's hard to appreciate the current used method. Is it possible to come up with a way so that the reconstruction will work for a more general initialization in this work as this is urgently needed for this work (not future work)?}
 
-\hspace{1em} Initialization in nonlinear inverse problems is not a trivial task. 
+\hspace{1em} Initialization in non-convex inverse problems is not a trivial task. 
 The recent proposal on identifying solution interval 
 \footnote{Zhang G, et al. Taking the guess work out of the initial guess: A solution interval method for least-squares parameter estimation in nonlinear models. \textit{J Comput Inf Sci Eng} 2021;21:021011.}
 reads a general initialization strategy, but requires abundant computational power 

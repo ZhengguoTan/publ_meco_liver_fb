@@ -94,7 +94,7 @@ in Berkeley Advanced Reconstruction Toolbox (BART)
 to jointly estimate all physical parameter maps 
 (water, fat, $R_2^*$, and $B_0$ field inhomogeneity maps) 
 and coil sensitivity maps from self-gated \textit{k}-space data. 
-Specifically, locally low rank and temporal total variation constraints 
+Specifically, locally low rank and temporal total variation regularization 
 were employed directly on physical parameter maps. 
 The proposed free-breathing radial technique 
 was tested on a water/fat \& iron phantom, a young volunteer, 
@@ -105,7 +105,7 @@ The multi-echo radial sampling sequence achieves
 fast \textit{k}-space coverage and is robust to motion. 
 Moreover, the proposed motion-resolved model-based reconstruction 
 allows for free-breathing liver fat and $R_2^*$ quantification 
-of multiple motion states. 
+in multiple motion states. 
 Overall, our proposed technique offers a convenient tool 
 for non-invasive liver assessment with no breath holding requirement.
 
@@ -138,7 +138,7 @@ several recent works proposed free-breathing liver fat and $R_2^*$ mapping.
 Armstrong et al.~\cite{armstrong_2018_fat} and 
 Zhong et al.~\cite{zhong_2020_r2sclinic,zhong_2020_resr2s} 
 proposed to use stack-of-radial multi-echo sampling with bipolar gradients. 
-Sampled echoes were then binned into four respiratory phases 
+Sampled echoes were binned into four respiratory phases 
 and reconstructed via NUFFT \cite{fessler_2003_nufft}. 
 Liver fat and $R_2^*$ maps are quantified 
 via physics modeling \cite{yu_2007_t2sideal,yu_2008_mft2sideal,chebrolu_2010_indiwf} 
@@ -194,54 +194,6 @@ quantification with reduced scan time.
 
 
 
-%\hl{To further improve the stack-of-radial multi-echo sampling efficiency, 
-%we incorporated asymmetric echo with multi-echo readouts, 
-%which reduces the acquisition time and renders echo asymmetry \mbox{\cite{reeder_2005_ideal}}.} \marginnote{R1.1}
-%Further, different from the above reconstruction approaches \cite{armstrong_2018_fat,zhong_2020_r2sclinic,zhong_2020_resr2s,schneider_2020_mobawfr2s,wang_2022_mt-me,starekova_2022_fb-fat}, 
-%we implemented a generalized nonlinear model-based reconstruction framework in BART, 
-%allowing for joint estimation of all model parameters, including $B_0$ field inhomogeneity maps.
-
-
-
-
-
-
-%Although numerically more challenging, 
-%model-based reconstruction allows for the application of direct regularization onto 
-%parameter maps, thereby opening up possibilities of enforcing physical properties 
-%in regularized inverse reconstructions. For instance, 
-%Zhang et al.~\cite{zhang_2015_llr} and Zhao et al.~\cite{zhao_2015_sparsity} 
-%proposed to apply local low rank and sparsity constraints 
-%on multi-contrast images for subsequent $T_1$ and $T_2$ parameter model fitting. 
-%Knoll et al.~\cite{knoll_2015_mobadiff} imposed a total variation (TV) constraint 
-%on the diffusion tensor. 
-%Tan et al.~\cite{tan_2017_mobaflow} applied Tikhonov regularization 
-%onto phase-contrast velocity maps. 
-%Roeloffs et al.~\cite{roeloffs_2016_mobat1} and 
-%Wang et al.~\cite{wang_2018_mobat1,wang_2019_myt1} explored 
-%the Tikhonov and spatial sparsity constraints of parameter maps 
-%for $T_1$ mapping, respectively. 
-%Zimmermann et al.~\cite{zimmermann_2018_mobamgre} minimized 
-%the rank of local Hankel matrices constructed along the echo dimension 
-%for the application of brain $R_2^*$ mapping.
-
-%In the regime of model-based reconstruction for multi-gradient-echo signal, 
-%one major challenge is the accurate estimation of $B_0$ field inhomogeneity maps. 
-%\hl{On the one hand, $B_0$ fluctuations induced by respiratory motion 
-%result in temporarily varying $B_0$ maps. 
-%On the other hand, the $B_0$ field map term appears as a non-linear term 
-%in the water/fat separation problem.} \marginnote{R1.7}
-%One popular proposal is \hl{to enforce spatial smoothness of the $B_0$ field map 
-%via first- or second-order finite-difference regularization 
-%\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}}}. \marginnote{R1.8}
-%Although promising, it may still be challenging when phase wraps occur along echoes. 
-%Another recent proposal is to incorporate a calibrated $B_0$ field map \cite{hernando_2010_gc} 
-%into the model-based reconstruction \cite{schneider_2020_mobawfr2s}, 
-%\hl{i.e.~keeping the $B_0$ field map as constant during the model-based reconstruction.} \marginnote{R1.3}
-
-
-
-
 \section{Theory}
 
 \subsection{Multi-Echo Radial Sampling}
@@ -253,8 +205,7 @@ quantification with reduced scan time.
 		the proposed multi-echo asymmetric-echo radial sequence. 
 		(Right) The corresponding \textit{k}-space trajectory. 
 		The echoes are color coded, indicating the period when ADC is switched on, 
-		while the dark solid lines indicate either the ramp or the blip gradients. 
-		The colored arrows near to echo numbers illustrate the readout direction.}
+		while the dark solid lines indicate either the ramp or the blip gradients.}
 	\label{FIG:SEQ}
 \end{figure}
 
@@ -268,9 +219,11 @@ and the angle increment between frames was the small Golden angle
 The angles of the radial spokes within one frame are 
 $\theta_{l,m} = 2\pi \cdot [ (l-1) \cdot N_\text{echo} + m - 1 ] / (N_\text{echo} \cdot N_\text{shot})$ 
 with $l$ and $m$ being the excitation and echo index, respectively. 
-To foster echo asymmetry and shorten scan time, 
-asymmetric echoes (i.e.~partial Fourier readouts) were employed in combination with 
-multi-echo sampling.
+\hl{To foster echo asymmetry and to shorten TE, TR as well as scan time, 
+asymmetric echoes (i.e.~partial Fourier readouts) \mbox{\cite{untenberger_2016_asym}} 
+were employed in combination with multi-echo sampling.}
+
+\marginnote[R1.1]
 
 
 \subsection{Nonlinear Signal Model}
@@ -303,9 +256,9 @@ The chemical-shift phase modulation from fat is denoted as
 $z_m$ with the 6-peak fat spectrum \cite{yu_2008_mft2sideal}, 
 while all fat peaks are assumed to have an equal $R_2^*$ \cite{reeder_2012_perfr2s}.
 $\text{W}$ and $\text{F}$ are complex-valued, 
-while $R_2^*$ and $f_{B_0}$ are constrained to be real. 
+while $R_2^*$ and $f_{B_0}$ are real. 
 
-Given the above MR signal models, the nonlinear forward model in multi-coil multi-echo acquisition 
+Given the above MR signal model, the nonlinear forward model in multi-coil multi-echo acquisition 
 can be written in the operator form 
 \begin{equation} \label{EQU:op_fwd}
 y_{j,m} = F_{j,m} (x) := P_m \mathcal{F} M \mathcal{S} \mathcal{B} \; ,
@@ -330,9 +283,9 @@ is applied to the sampling pattern to suppress potential checker-board artifacts
 The joint estimation of the unknown $x$ is a nonlinear inverse problem,
 \begin{equation} \label{EQU:obj_func}
 \begin{aligned}
-\text{minimize}~& \norm{y - F(x)}_2^2 \\
+\text{minimize}~& \sum_t \sum_m \sum_j \norm{y_{j,m,t} - F_{j,m,t}(x)}_2^2 \\
 & + \lambda_1 \norm{\mathcal{L} (E_1 x)}_1 + \lambda_2 \norm{\text{TV}_t (E_2 x)}_1 \\
-& + \lambda_3 \norm{x}_2^2 \\
+& + \lambda_3 [ \norm{x}_2^2 + \norm{T_{f_{B_0}} f_{B_0}}_2^2 + \norm{T_C C}_2^2 ]\\
 \text{subject to}~& {R_2^*} \geq 0
 \end{aligned}
 \end{equation}
@@ -346,33 +299,25 @@ and $N_\text{bin}$ is the number of respiratory bins.
 
 The locally low rank (LLR) regularization $\mathcal{L}$ with the regularization strength $\lambda_1$
 was applied onto the parameters $\mathrm{W}$, $\mathrm{F}$ and $R_2^*$. 
-These parameter maps were extracted from the complex $x$ matrix using the operator $E_1$, 
-which gets a sub-matrix from $x$. 
-Note that regularization of echo images is not possible in model-based reconstruction, 
-which formulates nonlinear inverse problems to directly estimate model parameter maps. 
+These parameter maps were extracted from the complex $x$ matrix using the extraction operator $E_1$. 
 The block size of the LLR constraint was $16 \times 16$ 
 with random shifts of the blocks among iterations.
 
-\marginnote{R1.2} \hl{For the reconstruction problems with a temporal dimension, 
-the data consistency term in \mbox{\cref{EQU:obj_func}} 
-expands to include all temporal frames, 
-\mbox{$\sum_t \sum_m \sum_j \norm{y_{j,m,t} - F_{j,m,t}(x)}_2^2$}.} 
-Therefore, temporal TV regularization \cite{feng_2014_grasp} 
+Temporal TV regularization \cite{feng_2014_grasp} 
 with the regularization strength $\lambda_2$ was applied onto 
 all model parameter maps ($\mathrm{W}$, $\mathrm{F}$, $R_2^*$, and $f_{B_0}$), 
 which can be extracted via the operator $E_2$.
 
 In addition, $\ell2$ regularization with the regularization strength $\lambda_3$ 
-was applied to all unknowns and 
-a non-negativity constraint to the $R_2^*$ map.
+was applied to all unknowns. 
 To enforce spatial smoothness of the $B_0$ and coil sensitivity maps, 
 the Sobolev-norm weighting \cite{uecker_2008_nlinv} 
 was utilized to penalize high spatial frequencies, 
 \begin{equation}
-	T = \mathcal{F}^{-1} \bigg(1 + w \cdot \norm{\vec{k}} \bigg)^{-h}
+	T = \mathcal{F}^{-1} \bigg(1 + w \cdot \norm{\vec{k}} \bigg)^{-h} \mathcal{F}
 \end{equation}
 $h$ is set as $16$ for both maps, 
-while $w = 22$ and $w = 220$ for the $f_{B_0}$ and coil sensitivity maps, 
+while $w_{f_{B_0}} = 22$ and $w_{C} = 220$ for the $f_{B_0}$ and coil sensitivity maps, 
 respectively. $\vec{k}$ is a 2D Cartesian grid ranging from $-0.5$ to $0.5$ 
 \cite{tan_2019_mobawf}.
 
@@ -538,14 +483,14 @@ Afterward, RING estimates the gradient delay coefficients
 given the position of the intersection points. 
 RING was applied to every echo to estimate 
 its corresponding gradient delay coefficients, 
-which were then used to correct for trajectories.
+which were then used to correct the trajectories.
 
 \subsubsection*{Binning}
 
 In this work, the singular spectrum analysis (SSA-FARY) technique 
 \cite{rosenzweig_2020_ssa} 
 was adapted for self-gating of respiratory motions. 
-SSA-FARY combines the ideas of time-delayed embedding and principle component analysis, 
+SSA-FARY combines the ideas of time-delayed embedding and principal component analysis, 
 and allows for robust extraction of oscillatory motion signals 
 such as respiration from an auto-calibration (AC) region. 
 In particular, for a periodic signal contained in the AC region, 
@@ -554,7 +499,7 @@ Such a quadrature pair can be thought of as a generalized sine-cosine-pair
 describing the respective periodic motion and can be represented by a phase-portrait, 
 where an angle of $0^o$ states the beginning and $360^o$ states the end of a motion cycle. 
 
-In this work, we chose to split the respiratory motion into four bins, 
+In this work, we chose to split the respiratory motion into $N = 4$ bins, 
 hence, each bin represents a circular sector with a central angle of $360^o / N$. 
 Then, the respiratory motion state at a given time is determined by 
 the respective angle defined by the quadrature pair.
@@ -565,7 +510,6 @@ Note that although more respiratory bins can improve the temporal resolution,
 it leads to fewer radial spokes per bin. Such a trade-off can be alleviated 
 via the temporal TV regularization. However, we observed that increasing bins 
 did not significantly affect the reconstructed image quality (results not shown). 
-Therefore, we chose four respiratory bins in this study.
 Since the reference Cartesian scan was performed during end expiration, 
 we used the end-expiration bin of the radial scan for comparison.
 
@@ -583,13 +527,13 @@ ${R_2^*}$ and coil sensitivity maps were initialized as \num{0}.
 
 For the model-based reconstruction, the regularization strength in \cref{EQU:obj_func} 
 (e.g.~$\lambda_1$, $\lambda_2$, and $\lambda_3$) 
-is reduced along Newton steps, e.g.~$\lambda_1^{(n)} = 1 / D^{n-1}$ for $\lambda_1$, 
+is reduced along Newton steps, e.g.~$\lambda_i^{(n)} = \lambda_i / D^{n-1}$ for $\lambda_1$, 
 with $n$ being the $n$th Newton iteration 
 and the reduction factor $D > 1$. \marginnote{R2.17}
 $D = 3$ was used in this work. 
-For ADMM, the maximum number of iterations in each Newton iteration 
+For ADMM, the maximum number of iterations in each Newton step 
 were given as:~$n_\text{maxiter} = \min (M, 10 \times 2^{- \ln \lambda^{(n)}})$, 
-where $M$ can be specified by the user (\num{200} as default). 
+where $M$ was set as \num{200}. 
 Consequently, the maximal iterations gradually increase along the Newton steps.
 
 In this work, eight Newton steps were employed, 
@@ -629,9 +573,7 @@ for pixels in which water dominates.
 			for the eights tubes via linear regression 
 			between the standard MR Spectroscopy (MRS) 
 			and the proposed multi-echo radial acquisition 
-			with model-based reconstruction. 
-			Tube 8 (filled with peanut oil) is excluded for the analysis 
-			due to the lack of its MRS measurement.}
+			with model-based reconstruction.}
 	\label{FIG:PHA_LINFIT}
 \end{figure}
 
@@ -912,7 +854,7 @@ However, neither of them shows the problem of obesity (see \cref{TAB:Subject}).
 Through \cref{FIG:LINREG} and \cref{FIG:HPDFF}, 
 we also observe that hepatic steatosis is more likely to occur in elderly patients. 
 Although fatty liver is also captured in the scan of Volunteer \#1, 
-this is rather a rare case among all young volunteers (results now shown here). 
+this is rather a rare case among all young volunteers (results not shown here). 
 On the other hand, in the left corner of the liver in Patient \#9 
 (see the green arrows), 
 $R_2^*$ values from the Cartesian scan again are higher, 
@@ -985,13 +927,13 @@ We found good agreement between the proposed free-breathing radial scan
 and the breath-hold Cartesian scan.
 
 \marginnote{R2.3}
-\hl{The $R_2^*$ maps of Patient \#1 from the proposed method are visually more blurred 
+The $R_2^*$ maps of Patient \#1 from the proposed method are visually more blurred 
 compared to the reference Cartesian scan, 
 while the volunteer $R_2^*$ map shows a sharp delineation of the liver and vessel borders. 
 This may be due to the use of a larger FOV in the acquisition protocol for patients, 
 which corresponds to higher undersampling. 
 On the other hand, the larger body size of this patient 
-may result in poorer receiver signals in the middle.}
+may result in poorer receiver signals in the middle.
 
 \marginnote{R2.7}
 \hl{In model-based reconstructions, parameter maps are directly reconstructed 
@@ -1007,7 +949,7 @@ with the reference breath-hold Cartesian scan.
 In addition, this study also compared against another model-based reconstruction approach 
 using spatial total variation regularization on parameter maps \mbox{\cite{schneider_2020_mobawfr2s}}. 
 It is evident in \mbox{\cref{FIG:REGU}} that spatial TV regularization on the parameter maps 
-can result in the ink-type artifact, whereas temporal TV regularization is beneficial to remove 
+can result in the ink-type artifact, whereas temporal TV regularization is beneficial to remove % TODO: ink
 streaking artifacts.
 }
 
@@ -1191,7 +1133,7 @@ Since the first one has already been implemented
 in BART for parallel imaging as nonlinear inversion (NLINV) \cite{uecker_2008_nlinv}, 
 only the second operator is required to be implemented.
 Afterward, the two nonlinear operators can be chained together. 
-Therefore, only the operator $B$ is explained in detail here.
+Therefore, only the operator $\mathcal{B}$ is explained in detail here.
 
 As denoted in \cref{EQU:meco_wfr2s}, the nonlinear operator $\mathcal{B}$ presents the mapping 
 from the parameter maps ($\text{W}, \text{F}, R_2^*, f_{B_0}$) 
