@@ -206,7 +206,12 @@ Scatter plots have been added to Figure 7. In addition, Table IV and V have been
 	\item \textit{"As shown in figs.~10 and 11, retrospective undersampling increases noise in the reconstructed maps (larger standard deviation), but the quantitative accuracy agrees well with the reconstruction on 2:47 min scan (average values are similar)." Figs.~10 and 11 show the images and some scatter plots with error bars, but they do not directly show those findings. Those claims would require hypothesis testing to compare standard deviations between scan times and average values between scan times, respectively.}
 
 \hspace{1em} Thank you for the suggestion. 
-The standard deviations and average values have been added to Tables VI and V.
+The standard deviations and average values have been added to Tables VI and V. 
+With these tables, we performed hypothesis testing, i.e.~two sample t-test. 
+The resulting p-value for the FF and the $R_2^*$ maps is 0.9588 and 0.9562, respectively.
+Both p-values are greater than the alpha value (0.05), 
+so the two scan results are in support of the null hypothesis 
+and there is no significant mean difference between them.
 
 	\item \textit{What is the impact of the authors' choice to impose the LLR constraint on parameter maps rather than echo dimension? It's an intriguing option that is only available to model-based methods, but hasn't been compared or discussed.}
 
@@ -423,7 +428,11 @@ Both plots and tables show good match between the proposed radial and the refere
 
 \hspace{1em} Thank you for the suggestion. $B_0$ field maps have been added to Figure 6 in the manuscript. In addition, \cref{SUPPFIG:SENS} shows the coil sensitivity maps estimated 
 from the proposed model-based reconstruction and ESPIRiT 
-\footnote{Uecker M, et al. ESPIRiT -- An eigenvalue approach to autocalibrating parallel MRI: Where SENSE meets GRAPPA. \textit{Magn Reson Med} 2014;71:990--1001.}, respectively.
+\footnote{Uecker M, et al. ESPIRiT -- An eigenvalue approach to autocalibrating parallel MRI: Where SENSE meets GRAPPA. \textit{Magn Reson Med} 2014;71:990--1001.}, respectively. 
+
+\hspace{1em} Please also refer to the ESPIRiT paper, 
+which already included the comparison of coil sensitivity maps 
+from nonlinear inversion and ESPIRiT.
 
 \begin{figure}[t]
 	\centering
