@@ -159,17 +159,20 @@ to obtain quantitative fat, $R_2^*$, and water-specific $T_1$ maps.
 Starekova et al.~\cite{starekova_2022_fb-fat} proposed a 2D acquisition scheme 
 with a non-local means \cite{buades_2005_nlm} motion-corrected averaging technique. 
 
-Among these free-breathing techniques, only the work from Schneider et al.~employed 
-model-based reconstruction. However, this work did not allow for $B_0$ update during 
-motion-resolved model-based reconstruction. Joint $B_0$ estimation is challenging. 
-\hl{On the one hand, $B_0$ fluctuations induced by respiratory motion 
-	result in temporarily varying $B_0$ maps. 
-	On the other hand, the $B_0$ field map term appears as a non-linear term 
-	in the water/fat separation problem.} \marginnote{R1.7}
-One popular proposal is \hl{to enforce spatial smoothness of the $B_0$ field map 
-	via first- or second-order finite-difference regularization 
-	\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}}}. \marginnote{R1.8}
-Although promising, it may still be challenging when phase wraps occur along echoes. 
+Among these free-breathing techniques, only the work from Schneider et al. employed 
+model-based reconstruction. However, this work did not allow \hl{update $B_0$ maps
+and coil sensitivities during motion-resolved model-based reconstruction, which
+is problematic because field fluctuations induced by respiratory motion
+result in temporarily varying $B_0$ maps and coil sensitivities. Here,
+we integrate joint $B_0$ estimation into the reconstruction, which is
+challenging because the $B_0$ field map term appears as a non-linear
+term in the water/fat separation problem and it may change rapidely
+at water-tissue interfaces.} \marginnote{R1.7}
+\hl{Joint estimation of the field map was proposed before using
+a smoothness prior on the $B_0$ field map  via first- or second-order
+finite-difference regularization 
+\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}},
+which is insufficient in case of such more pronounced field inhomogeneities}. \marginnote{R1.8}
 
 
 \marginnote[R2.13]
@@ -958,9 +961,9 @@ with the reference breath-hold Cartesian scan.
 In addition, this study also compared against another model-based reconstruction approach 
 using spatial total variation regularization on parameter maps \mbox{\cite{schneider_2020_mobawfr2s}}. 
 It is evident in \mbox{\cref{FIG:REGU}} that spatial TV regularization on the parameter maps 
-can result in the ink-type artifact, whereas temporal TV regularization is beneficial to remove % TODO: ink
-streaking artifacts.
-}
+can result in the cartoon-like artifacts, whereas temporal TV regularization is
+beneficial to remove  streaking artifacts.
+}%FIXME: check schneider
 
 
 \marginnote{R3.3}
