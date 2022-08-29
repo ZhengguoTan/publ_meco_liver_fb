@@ -328,9 +328,10 @@ Our implementation enables flexible selections of regularization terms.
 
 We compared our proposed regularization strategy against only $\ell^2$ regularization 
 (i.e.~removal of the $\ell^1$ terms in \cref{EQU:obj_func}) 
-as well as the spatial TV regularization method 
-(i.e.~replacement of all regularization terms in \cref{EQU:obj_func} by 
-$\lambda_4 \norm{\text{TV}_\text{spatial} (E_1 x)}_1$) \cite{schneider_2020_mobawfr2s}.
+as well as the temporal TV regularization method 
+without and with $B_0$ update. 
+The method from Schneider et al.~\cite{schneider_2020_mobawfr2s} pre-calibrated $B_0$ maps, 
+i.e.~$B_0$ was kept constant during iterative reconstruction.
 
 \section{Methods}
 
@@ -607,12 +608,20 @@ The $R_2^*$ maps from Cartesian scans suffer from noise in the middle region
 Moreover, as pointed out by the yellow arrows, 
 incomplete breath hold results in artifacts in the $R_2^*$ maps.
 For model-based reconstructions of the radial scan, 
-three regularizations of the parameter maps ($\mathrm{W}$, $\mathrm{F}$ and $R_2^*$) were compared: 
-$\ell^2$, spatial TV (as employed by Schneider et al.~\cite{schneider_2020_mobawfr2s}), and 
+three regularizations of the parameter maps ($\mathrm{W}$, $\mathrm{F}$, $R_2^*$ and $f_{B_0}$) 
+were compared: 
+$\ell^2$, temporal TV without $B_0$ update 
+(as employed by Schneider et al.~\cite{schneider_2020_mobawfr2s}), 
+temporal TV with $B_0$ update and 
 LLR plus temporal TV proposed in this work. 
-The application of LLR plus temporal TV regularization outperforms 
-both the $\ell^2$ and the spatial TV regularizations, 
-as evident by the reduced streaking artifacts and better delineation of the liver. 
+Firstly, residual streaking artifacts can be suppressed via 
+the use of spatial LLR and temporal TV regularization.
+Secondly, it is advantageous to update $B_0$ during model-based iterative reconstruction. 
+On the one hand, the current initialization strategy used 
+only the first three echoes with limited radial spokes, 
+which supplies only rough estimate of the $B_0$ map.
+On the other hand, performing $B_0$ update can help to recover more $B_0$ information 
+given the use of all seven echoes.
 All subsequent figures use the same color maps for FF and $R_2^*$ as in \cref{FIG:REGU}.
 
 \begin{figure*}
