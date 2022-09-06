@@ -139,7 +139,7 @@ Armstrong et al.~\cite{armstrong_2018_fat} and
 Zhong et al.~\cite{zhong_2020_r2sclinic,zhong_2020_resr2s} 
 proposed to use stack-of-radial multi-echo sampling with bipolar gradients. 
 Sampled echoes were binned into four respiratory phases 
-and reconstructed via NUFFT \cite{fessler_2003_nufft}. 
+and reconstructed via non-uniform FFT (NUFFT) \cite{fessler_2003_nufft}. 
 Liver fat and $R_2^*$ maps are quantified 
 via physics modeling \cite{yu_2007_t2sideal,yu_2008_mft2sideal,chebrolu_2010_indiwf} 
 and image-space fitting \cite{reeder_2005_ideal,hernando_2010_gc,zhong_2014_wfadafit}. 
@@ -329,9 +329,11 @@ Our implementation enables flexible selections of regularization terms.
 We compared our proposed regularization strategy against only $\ell^2$ regularization 
 (i.e.~removal of the $\ell^1$ terms in \cref{EQU:obj_func}) 
 as well as the temporal TV regularization method 
-without and with $B_0$ update. 
-The method from Schneider et al.~\cite{schneider_2020_mobawfr2s} pre-calibrated $B_0$ maps, 
-i.e.~$B_0$ was kept constant during iterative reconstruction.
+without $B_0$ update (similar to the work from Schneider et al.~\cite{schneider_2020_mobawfr2s}). 
+Keeping $B_0$ constant during model-based reconstruction can be realized via 
+setting the forward model's adjoint of derivative term with respect to $B_0$ as 0 
+(Previously, this has been applied to nonlinear inversion as parallel imaging to 
+keep coil sensitivity maps constant during iterative reconstruction \cite{uecker_2008_nlinv}).
 
 \section{Methods}
 
@@ -595,8 +597,8 @@ as shown in \cref{FIG:PHA_LINFIT}.
 		Furthermore, for the radial data in (B), 
 		we compared three different regularizations: 
 		L2 regularization, 
-		spatial TV regularization as used by Schneider et al.~\cite{schneider_2020_mobawfr2s}, 
-		and the proposed LLR and temporal TV regularization. }
+		temporal TV regularization without $B_0$ update, 
+		and the proposed spatial LLR and temporal TV regularization with $B_0$ update.}
 	\label{FIG:REGU}
 \end{figure*}
 
@@ -612,14 +614,13 @@ three regularizations of the parameter maps ($\mathrm{W}$, $\mathrm{F}$, $R_2^*$
 were compared: 
 $\ell^2$, temporal TV without $B_0$ update 
 (as employed by Schneider et al.~\cite{schneider_2020_mobawfr2s}), 
-temporal TV with $B_0$ update and 
-LLR plus temporal TV proposed in this work. 
+LLR plus temporal TV with $B_0$ update. 
 Firstly, residual streaking artifacts can be suppressed via 
 the use of spatial LLR and temporal TV regularization.
 Secondly, it is advantageous to update $B_0$ during model-based iterative reconstruction. 
 On the one hand, the current initialization strategy used 
-only the first three echoes with limited radial spokes, 
-which supplies only rough estimate of the $B_0$ map.
+only the first three echoes with limited coverage of $k$-space, 
+ which supplies only rough estimate of the $B_0$ map.
 On the other hand, performing $B_0$ update can help to recover more $B_0$ information 
 given the use of all seven echoes.
 All subsequent figures use the same color maps for FF and $R_2^*$ as in \cref{FIG:REGU}.
@@ -956,11 +957,8 @@ can be employed along the echo dimension.
 However, this study mainly focused on the comparison 
 with the reference breath-hold Cartesian scan. 
 In addition, this study also compared against another model-based reconstruction approach 
-using spatial total variation regularization on parameter maps \mbox{\cite{schneider_2020_mobawfr2s}}. 
-It is evident in \mbox{\cref{FIG:REGU}} that spatial TV regularization on the parameter maps 
-can result in the ink-type artifact, whereas temporal TV regularization is beneficial to remove % TODO: ink
-streaking artifacts.
-}
+using temporal total variation regularization on water, fat and $R_2^*$ maps, 
+whereas $B_0$ and coil sensitivity maps were calibrated and kept constant  \mbox{\cite{schneider_2020_mobawfr2s}}.}
 
 
 \marginnote{R3.3}
@@ -1061,7 +1059,7 @@ in which multiple temporal frames of
 the physical parameter maps (water, fat, $R_2^*$, and $B_0$) 
 and coil sensitivity maps are jointly estimated. 
 The proposed method is validated with the reference breath-hold Cartesian scan and 
-is compared with another recent approach employs spatial TV regularization. 
+is compared with another recent approach employs temporal TV regularization without $B_0$ update. 
 This technique offers a non-invasive and non-physiological-gated tool 
 for quantitative liver assessment. 
 
