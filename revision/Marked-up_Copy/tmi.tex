@@ -44,7 +44,7 @@
 
 % for review
 \usepackage{color,soul}
-\usepackage{marginnote}
+\usepackage[fulladjust]{marginnote}
 
 \usepackage{xcolor}
 \newcommand{\mathcolorbox}[2]{\colorbox{#1}{$\displaystyle #2$}}
@@ -57,30 +57,31 @@
 	This work was supported by DFG (German Research Foundation) 
 	- TA 1473/2-1, UE 189/4-1, and EXC 2067/1-390729940, 
 	DZHK (German Centre for Cardiovascular Research) and NIH U24EB029240.}
-\thanks{Z.~T.~was with Institute for Diagnostic and Interventional Radiology, 
+\thanks{Z.~T.~was with the Institute for Diagnostic and Interventional Radiology, 
 	University Medical Center G\"ottingen (UMG). 
 	He is now with Department of Artificial Intelligence in 
 	Biomedical Engineering, University of Erlangen–Nuremberg 
 	(e-mail:~zhengguo.tan@fau.de).}
-\thanks{C.~U.~is with Department of Cardiology and Pulmonology, UMG 
+\thanks{C.~U.~is with the Department of Cardiology and Pulmonology, UMG 
 	(e-mail:~unterberg@med.uni-goettingen.de).}
-\thanks{M.~B., N.~S., and P.~S.~are with 
+\thanks{M.~B., N.~S., and P.~S.~are with the
 	Institute for Diagnostic and Interventional Radiology, UMG 
 	(e-mail:~moritz.blumenthal@med.uni-goettingen.de; 
 	nick.scholand@med.uni-goettingen.de; 
 	philip.schaten@med.uni-goettingen.de).}
-\thanks{C.~H. and X.~W.~were with 
-	Institute for Diagnostic and Interventional Radiology, UMG. 
-	They are now with Institute of Biomedical Imaging, 
+\thanks{C.~H. and X.~W.~are with the Institute of Biomedical Imaging, 
 	Graz University of Technology 
 	(e-mail:~christian.holme@med.uni-goettingen.de; 
 	xiaoqing.wang@med.uni-goettingen.de).}
-\thanks{D.~R.~is with Clinic of Gastroenterology, 
+\thanks{D.~R.~is with the Clinic of Gastroenterology, 
 	Gastrointestinal Oncology and Endocrinology, UMG 
 	(e-mail:~draddatz@med.uni-goettingen.de).}
-\thanks{M.~U.~is with Institute of Biomedical Imaging, 
-	Graz University of Technology and 
-	Institute for Diagnostic and Interventional Radiology, UMG 
+\thanks{M.~U.~is with the Institute of Biomedical Imaging, 
+	Graz University of Technology, the
+	Institute for Diagnostic and Interventional Radiology, UMG,
+	the Cluster of Excellence ''Multiscale Bioimaging: from Molecular
+	Machines to Networks of Excitable Cells'' (MBExC), G\"ottingen,
+	and BioTechMed-Graz, Graz, Austria
 	(e-mail:~uecker@tugraz.at).}}
 
 \maketitle
@@ -147,9 +148,9 @@ and image-space fitting \cite{reeder_2005_ideal,hernando_2010_gc,zhong_2014_wfad
 employed model-based reconstruction 
 \mbox{\cite{block_2009_mobat2,fessler_2010_moba,doneva_2010_mobawf}} 
 to jointly reconstruct water, fat, and $R_2^*$ maps directly from $k$-space data 
-with spatial or temporal total variation (TV) regularization, 
+with spatial and temporal total variation (TV) regularization, 
 whereas the $B_0$ field inhomogeneity map was pre-calibrated \mbox{\cite{hernando_2010_gc}} 
-and kept constant. } \marginnote{R1.3}
+and was then kept fixed during iterative reconstruction.} \marginnote{R1.3}
 Wang et al.~\cite{wang_2022_mt-me} implemented 
 inversion recovery (IR) magnetization preparation before multi-echo readouts 
 and applied the multi-tasking reconstruction technique \cite{christodoulou_2018_mt} 
@@ -159,38 +160,39 @@ to obtain quantitative fat, $R_2^*$, and water-specific $T_1$ maps.
 Starekova et al.~\cite{starekova_2022_fb-fat} proposed a 2D acquisition scheme 
 with a non-local means \cite{buades_2005_nlm} motion-corrected averaging technique. 
 
-Among these free-breathing techniques, only the work from Schneider et al.~employed 
-model-based reconstruction. However, this work did not allow for $B_0$ update during 
-motion-resolved model-based reconstruction. Joint $B_0$ estimation is challenging. 
-\hl{On the one hand, $B_0$ fluctuations induced by respiratory motion 
-	result in temporarily varying $B_0$ maps. 
-	On the other hand, the $B_0$ field map term appears as a non-linear term 
-	in the water/fat separation problem.} \marginnote{R1.7}
-One popular proposal is \hl{to enforce spatial smoothness of the $B_0$ field map 
-	via first- or second-order finite-difference regularization 
-	\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}}}. \marginnote{R1.8}
-Although promising, it may still be challenging when phase wraps occur along echoes. 
+Among these free-breathing techniques, only the work from Schneider et al. employed 
+model-based reconstruction. However, this work calibrated sensitivities
+and field map based on an a fast initial reconstruction with lower quality.
+This is suboptimal, as these maps are then either affected by inconsistencies due 
+to lower temporal resolution when averaging data from multiple motion states
+or affected by undersampling artefacts.
+Joint estimation of the field map can reduce errors. It was proposed 
+before using a smoothness prior on the $B_0$ field map via first- or 
+second-order finite-difference regularization 
+\mbox{\cite{sutton_2004_dynamicfield,olafsson_2008_joint,funai_2008_secondorder}},
+\hl{Integration of the field map into a motion-resolved reconstruction for
+free-breathing liver imaging poses substantial additional challenges,
+as the $B_0$ field map appears as a non-linear term in the water/fat separation
+and may change rapidely at water-tissue interfaces.} \marginnote{R.1.7, \\R1.8, \\R2.13}
 
+% \marginnote[R2.13]
 
-\marginnote[R2.13]
-
-The contribution of this work is two-fold.
+The contribution of this work is two-fold:
 First, to achieve more efficient and faster acquisition, 
 our work combined multi-echo asymmetric-echo radial fast low-angle shot (FLASH) 
 with stack-of-stars volumetric acquisition \cite{block_2014_rad}
 for free-breathing acquisition. 
 Second, we implemented a regularized model-based reconstruction method 
-for joint estimation of all quantitative parameter maps 
-and coil sensitivity maps directly from $k$-space data. 
+for joint estimation of all quantitative parameter maps as well as
+\hl{$B_0$ map}, and coil sensitivity maps directly from $k$-space data,
+thus extending the approach used by Schneider et al.
 We solved the nonlinear inverse problem via 
 iteratively regularized Gauss-Newton method (IRGNM) \cite{uecker_2008_nlinv} 
 with the alternating direction method of multipliers (ADMM), 
 allowing for generalized regularization terms \cite{boyd_2010_admm}. 
 We validated the proposed acquisition and reconstruction methods by 
 comparing with the \hl{reference breath-hold Cartesian scan \mbox{\cite{zhong_2014_wfadafit}}} 
-through patients diagnosed with obesity, diabetes, or non-alcoholic fatty liver disease (NAFLD). 
-This work achieves joint estimation of water, fat, $R_2^*$ and $B_0$ maps for free-breathing volumetric liver 
-quantification with reduced scan time.
+in volunteers and patients diagnosed with obesity, diabetes, or non-alcoholic fatty liver disease (NAFLD). 
 
 
 
@@ -219,7 +221,7 @@ and the angle increment between frames was the small Golden angle
 The angles of the radial spokes within one frame are 
 $\theta_{l,m} = 2\pi \cdot [ (l-1) \cdot N_\text{echo} + m - 1 ] / (N_\text{echo} \cdot N_\text{shot})$ 
 with $l$ and $m$ being the excitation and echo index, respectively. 
-\hl{To foster echo asymmetry and to shorten TE, TR as well as scan time, 
+\hl{To shorten TE, TR as well as scan time, 
 asymmetric echoes (i.e.~partial Fourier readouts) \mbox{\cite{untenberger_2016_asym}} 
 were employed in combination with multi-echo sampling.}
 
@@ -365,9 +367,7 @@ keep coil sensitivity maps constant during iterative reconstruction \cite{uecker
 
 A water/fat \& iron phantom \cite{hines_2009_wfiron,bush_2018_fat} was constructed. 
 Details of this phantom are provided in \cref{FIG:PHA_WFIRON} and \cref{TAB:PHA}. 
-\hl{Due to steams coming from the water solution, 
-which was heated at the hotplate at \mbox{\SI{300}{\celsius}} 
-to create water and fat emulsion, 
+\hl{Due to water lost as steam in the preparation of the water and fat emulsion, 
 the actual fat fraction was higher than prescribed in \mbox{\cref{TAB:PHA}}. 
 Therefore, the actual fat fraction values of every tube were validated using 
 the standard Siemens MR spectroscopy (MRS) protocol.} \marginnote{R2.2}
@@ -397,9 +397,10 @@ Although the Cartesian scan requires one single breath hold
 and is fast, it captures only one motion state. 
 In contrast, the proposed radial scan allows for free breathing, 
 but requires longer scan time (2:47~\si{\minute}). 
-Further, we investigated the effectiveness of 
+We therefore, also investigated the effectiveness of 
 the proposed motion-resolved model-based reconstruction 
-on retrospectively undersampled radial data.
+on retrospectively undersampled (shortend)
+radial data corresponding to a scan time of 1:24~\si{\minute}.
 
 
 \begin{table}
@@ -609,21 +610,21 @@ The $R_2^*$ maps from Cartesian scans suffer from noise in the middle region
 (likely due to undersampling in the phase-encoding direction). 
 Moreover, as pointed out by the yellow arrows, 
 incomplete breath hold results in artifacts in the $R_2^*$ maps.
-For model-based reconstructions of the radial scan, 
-three regularizations of the parameter maps ($\mathrm{W}$, $\mathrm{F}$, $R_2^*$ and $f_{B_0}$) 
-were compared: 
+For model-based reconstruction of the parameter
+maps ($\mathrm{W}$, $\mathrm{F}$, $R_2^*$ and $f_{B_0}$) 
+from the radial scan, three different versions were compared: 
 $\ell^2$, temporal TV without $B_0$ update 
 (as employed by Schneider et al.~\cite{schneider_2020_mobawfr2s}), 
 LLR plus temporal TV with $B_0$ update. 
-Firstly, residual streaking artifacts can be suppressed via 
-the use of spatial LLR and temporal TV regularization.
-Secondly, it is advantageous to update $B_0$ during model-based iterative reconstruction. 
-On the one hand, the current initialization strategy used 
+The results show that residual streaking artifacts can be suppressed 
+via the use of spatial LLR and temporal TV regularization.
+Furthermore, it is advantageous to update $B_0$ during model-based 
+iterative reconstruction. The current initialization strategy used 
 only the first three echoes with limited coverage of $k$-space, 
- which supplies only rough estimate of the $B_0$ map.
-On the other hand, performing $B_0$ update can help to recover more $B_0$ information 
-given the use of all seven echoes.
-All subsequent figures use the same color maps for FF and $R_2^*$ as in \cref{FIG:REGU}.
+which supplies only rough estimate of the $B_0$ map.
+Performing $B_0$ update can help to recover more $B_0$ information 
+given the use of all seven echoes. All subsequent figures use 
+the same color maps for FF and $R_2^*$ as in \cref{FIG:REGU}.
 
 \begin{figure*}
 	\centering 
@@ -878,7 +879,8 @@ created by the empty region within the stomach.
 	\caption{Comparison of FF and $R_2^*$ maps for Patients (A) \#3 and (B) \#8 
 		among the reference Cartesian scan, 
 		the free-breathing radial 2:47~min scan, 
-		and the free-breathing radial scan with retrospective two-fold undersampling. 
+		and the free-breathing radial scan with retrospective two-fold undersampling,
+		corresponding to a scan time of 1:24~\si{\minute}.
 		Note the ripple-like artifact in the $R_2^*$ map from the Cartesian scans 
 		due to incomplete breath hold (yellow arrows in the 1st row).}
 	\label{FIG:R2STAR}
@@ -988,7 +990,7 @@ showed symptoms of iron overload (i.e.~elevated $R_2^*$ values).
 To the best of our knowledge, iron overload is more likely to be seen 
 in patients who require regular blood transfusions. 
 These patients, however, are rather rare in obesity/diabetes clinics. 
-Although lacking real patients, we showed the capability of our technique in 
+Although lacking such patients, we showed the capability of our technique in 
 quantifying iron overload in the phantom, as seen in \cref{FIG:PHA}, 
 where Tube 3 results in the highest $R_2^*$ value due to iron. 
 
@@ -1051,17 +1053,15 @@ of the free-breathing model-based reconstruction method.
 This work introduced a free-breathing liver fat and $R_2^*$ quantification 
 technique, comprising stack-of-radial multi-echo asymmetric-echo volumetric continuous acquisition 
 and regularized non-linear model-based reconstruction. 
-The generic model-based reconstruction framework in BART allows for 
-generalized regularization terms and is integrable with different physical models. 
-This work demonstrated the computational power of 
-the proposed nonlinear inverse reconstruction framework, 
-in which multiple temporal frames of 
-the physical parameter maps (water, fat, $R_2^*$, and $B_0$) 
-and coil sensitivity maps are jointly estimated. 
-The proposed method is validated with the reference breath-hold Cartesian scan and 
-is compared with another recent approach employs temporal TV regularization without $B_0$ update. 
-This technique offers a non-invasive and non-physiological-gated tool 
-for quantitative liver assessment. 
+The generic model-based reconstruction framework in BART allows the flexible
+use of generalized regularization terms and is integrable with different 
+physical models. This work uses this framework for joint estimation of
+time-resolved physical parameter maps (water, fat, $R_2^*$, and $B_0$) 
+and coil sensitivity maps.
+The proposed method is validated against a reference breath-hold Cartesian scan 
+on healthy volunteers and patients.
+This technique offers a non-invasive tool for quantitative liver assessment
+during free breathing.
 
 \begin{appendices}
 \crefalias{section}{appsec}
