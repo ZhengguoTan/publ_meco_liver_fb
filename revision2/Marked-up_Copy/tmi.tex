@@ -946,13 +946,11 @@ whereas other reconstruction techniques calibrate coil sensitivity maps
 before image reconstruction. 
 The state-of-the-art coil sensitivity calibration method is 
 ESPIRiT \mbox{\cite{uecker_2014_espirit}}. 
-Therefore, \mbox{\cref{FIG:SENS}} displays the estimated coil sensitivity maps 
-from the joint estimation method and ESPIRiT, respectively. 
-The spatial brightness of coil sensitivity maps from both methods is similar, 
-but the joint estimation method does not show bright signal in regions outside the subject.
-ESPIRiT supplies a thresholding parameter for sensitivity cropping, 
-which was not used here for fair comparison.
-}
+Therefore, \mbox{\cref{FIG:SENS}} displays the first five coil sensitivity maps 
+of the first respiratory bin from the joint estimation method and ESPIRiT, respectively. 
+Since coil sensitivity maps from ESPIRiT are inherently normalized, 
+normalization is also done for the coil sensitivity maps from joint estimation. 
+Both methods render similar coil sensitivity maps.}
 
 
 \section{Discussion}
