@@ -616,25 +616,25 @@ $\ell^2$, temporal TV without $B_0$ update
 LLR plus temporal TV with $B_0$ update. 
 The results show that residual streaking artifacts can be suppressed 
 via the use of spatial LLR and temporal TV regularization.
-
 \marginnote{R1.1}
-\hl{Moreover, it is advantageous to update $B_0$ during model-based 
-iterative reconstruction. 
-As shown in \mbox{\cref{FIG:B0}}, the current initialization strategy used 
+\hl{An update of the $B_0$ map during the model-based iterative reconstruction
+improves the reconstructed FF and $R_2^*$ maps. The current initialization
+strategy used 
 only the first three echoes with limited coverage of $k$-space, 
-which supplies only rough estimate of the $B_0$ map.
-Performing $B_0$ update can help to recover more $B_0$ information 
-given the use of all seven echoes.} All subsequent figures use 
+which supplies only a rough estimate of the $B_0$ map.
+Performing $B_0$ updates can help to recover a more accurate $B_0$ map
+by using information from all seven echoes as shown in \mbox{\cref{FIG:B0}}.}
+All subsequent figures use 
 the same color maps for FF and $R_2^*$ as in \cref{FIG:REGU}.
-
 
 \begin{figure*}
 	\centering
 	\includegraphics[width=\textwidth]{../../figures/tan6.pdf}
-	\caption{(A) Initialized $B_0$ maps of four respiratory bins 
+	\caption{(A) Initial $B_0$ maps of four respiratory bins 
 		for the model-based reconstruction without $B_0$ update in \cref{FIG:REGU}.
 		(B) Jointly updated $B_0$ maps of four respiratory bins. 
-		Joint update using seven echoes supplies more details in $B_0$ maps.}
+		Joint update using seven echoes helps to recover more details in 
+		the $B_0$ maps.}
 	\label{FIG:B0}
 \end{figure*}
 
@@ -934,23 +934,22 @@ but the mean values agree well with the reconstruction on the 2:47~min scan (the
 \begin{figure*}
 	\centering
 	\includegraphics[width=\textwidth]{../../figures/tan13.pdf}
-	\caption{Magnitude of coil sensitivity maps on Patient \#1 from 
+	\caption{Magnitude of coil sensitivity maps for Patient \#1 from 
 		(top) the proposed model-based method and (bottom) the ESPIRiT method.}
 	\label{FIG:SENS}
 \end{figure*}
 
 \marginnote{R1.2}
-\hl{This work focuses on joint estimation of all parameter maps 
-via solving a nonlinear inverse problem, 
-whereas other reconstruction techniques calibrate coil sensitivity maps 
-before image reconstruction. 
-The state-of-the-art coil sensitivity calibration method is 
-ESPIRiT \mbox{\cite{uecker_2014_espirit}}. 
-Therefore, \mbox{\cref{FIG:SENS}} displays the first five coil sensitivity maps 
-of the first respiratory bin from the joint estimation method and ESPIRiT, respectively. 
+\hl{This work uses joint estimation of all parameter maps by solving a
+nonlinear inverse problem. This includes simultaneous estimation of the
+coil sensitivity maps.
+\mbox{\cref{FIG:SENS}} displays the first five coil sensitivity maps 
+of the first respiratory bin in comparison to sensitivities estimated
+with ESPIRiT\mbox{\cite{uecker_2014_espirit}}.
 Since coil sensitivity maps from ESPIRiT are inherently normalized, 
-normalization is also done for the coil sensitivity maps from joint estimation. 
-Both methods render similar coil sensitivity maps.}
+normalization is also applied to the coil sensitivity maps from the
+model based reconstruction. The coil sensitivity maps from both
+methods are very similar inside the region with signal.}
 
 
 \section{Discussion}
