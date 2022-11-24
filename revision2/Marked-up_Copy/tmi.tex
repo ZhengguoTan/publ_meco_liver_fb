@@ -130,7 +130,7 @@ Originating from the two-echo chemical-shift-encoded Dixon method
 \cite{dixon_1984_wf} for qualitative water/fat separation, 
 quantitative assessment of liver fat and iron decomposition firstly requires 
 multi-echo chemical-shift encoding (e.g.~low flip angle multi-gradient-echo acquisition). 
-Conventional acquisition methods require subjects to perform proper breath hold. 
+Conventional acquisition methods require subjects to \hl{hold their breath.}
 Therefore, incomplete breath hold or incompliant patients can induce 
 pronounced image artifacts, 
 thereby hampering the quantification of liver fat and $R_2^*$.
@@ -270,7 +270,7 @@ and $m$ the echo index ($m \in [1, N_\text{echo}]$).
 The nonlinear operator ($\mathcal{B}$) calculates echo images 
 according to the parameter maps in $x$ and 
 the corresponding signal model as given in \cref{EQU:meco_wfr2s}. 
-Every echo image is then point-wisely multiplied by every coil sensitivity map in $x$, 
+Every echo image is then pointwisely multiplied by every coil sensitivity map in $x$, 
 as denoted by the operator $\mathcal{S}$. 
 Afterward, all multi-echo coil images are masked to be restricted to a given
 field of view (FOV) ($M$), Fourier-transformed ($\mathcal{F}$), and sampled ($P$) at each echo.
@@ -388,7 +388,7 @@ For in vivo scans, the same coils and MRI system were used.
 Two radial protocols were implemented, one with a smaller field of view (FOV) 
 \SI{320}{\milli\meter} for subjects with relatively small body size (Volunteer \#1), 
 and another with a larger FOV \SI{410}{\milli\meter} 
-which fits well for obese patients (Patient \#1 to \#9).
+which fits well for obese patients (Patient \#1 to \#9). %FIXME
 Breath-hold multi-echo Cartesian Dixon MRI was used as the reference. 
 Detailed parameters are provided in \cref{TAB:Protocol}. 
 Although the Cartesian scan requires one single breath hold 
@@ -435,7 +435,13 @@ radial data corresponding to a scan time of 1:24~\si{\minute}.
 	\end{threeparttable}
 \end{table}
 
-One volunteer and nine obesity/diabetes/NAFLD patients participated in our study.
+One volunteer and \hl{twenty obesity/diabetes/NAFLD patients were scanned
+with the both the multi-echo radial sampling sequence and the Cartesian
+DIXON sequence. The data for five patients were exluded because the
+automatic calibration of the resonance frequency used the the fat
+instead of the water peak, which then causes the reconstruction to fail.
+While this can be corrected in post-processing, this is not yet
+implemented.}
 All subjects gave written informed consent before MRI 
 in compliance with the regulations established by the local ethics committee. 
 A summary of all subjects is given in \cref{TAB:Subject}, 
@@ -872,8 +878,8 @@ while our proposed radial scan shows more homogeneous $R_2^*$ maps.
 Second, in our study, patients with hepatic steatosis may not necessarily be obese. 
 \Cref{FIG:HPDFF} displays one volunteer and one patient with elevated FF values from 
 both the reference breath-hold Cartesian and the free-breathing radial 
-scans. Patient \#9 was even confirmed about hepatic steatosis via 
-the standard liver biopsy and ultrasound diagnosis. 
+scans. Patient \#9 has hepatic steatosis as confirmed via %FIXME changes
+liver biopsy and ultrasound diagnosis. 
 However, neither of them shows the problem of obesity (see \cref{TAB:Subject}). 
 Through \cref{FIG:LINREG} and \cref{FIG:HPDFF}, 
 we also observe that hepatic steatosis is more likely to occur in elderly patients. 
@@ -1205,14 +1211,14 @@ The adjoint operator is then its complex conjugate transpose.
 
 \end{appendices}
 
-\section*{Acknowledgment}
+\section*{Acknowledgments}
 
 Z.~T.~sincerely thanks Ms.~Sarina Tepan 
-for the organization of patients to evaluate the proposed method. 
+for help with the organization of patient study. 
 Z.~T.~also thanks Drs.~Jens Frahm and Kai Tobias Block 
 for various discussions.
 Z.~T.~and M.~U.~thank DFG for the research grant 
-on TA 1473/2-1 and UE 189/4-1 (Project number: 427934942). 
+TA 1473/2-1 and UE 189/4-1. 
 
 
 
